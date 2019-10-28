@@ -9,6 +9,7 @@
 	tools:context=".MainActivity">
 
 	<com.inlacou.inkseekbar.InkSeekbar
+		android:id="@+id/inkseekbar"
 		android:layout_width="200dp"
 		android:layout_height="200dp"
 		/>
