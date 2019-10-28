@@ -1,7 +1,10 @@
 package com.inlacou.inkseekbarlibraryproject
 
+import android.content.res.Resources
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.method.TextKeyListener.clear
 import android.util.Log
 import com.inlacou.inkseekbar.InkSeekbar
 import io.reactivex.Observable
@@ -16,16 +19,52 @@ class MainActivity : AppCompatActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		inkSeekbar = findViewById(R.id.inkseekbar)
+		inkSeekbar?.backgroundColors?.apply {
+			clear()
+			add(resources.getColorCompat(R.color.basic_black))
+			add(resources.getColorCompat(R.color.basic_grey))
+		}
+		inkSeekbar?.primaryColors?.apply {
+			clear()
+			add(resources.getColorCompat(R.color.colorPrimary))
+		}
+		inkSeekbar?.secondaryColors?.apply {
+			clear()
+			add(resources.getColorCompat(R.color.colorPrimaryDark))
+		}
+		inkSeekbar?.backgroundCornerRadii?.apply {
+			clear()
+			add(16f)
+		}
+		inkSeekbar?.primaryCornerRadii?.apply {
+			clear()
+			add(16f)
+		}
+		inkSeekbar?.secondaryCornerRadii?.apply {
+			clear()
+			add(16f)
+		}
+		inkSeekbar?.primaryMargin = 5
+		inkSeekbar?.secondaryMargin = 10
+		inkSeekbar?.updateColors()
 		Observable.interval(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
 			Log.d("MainAct", "step")
 			inkSeekbar?.let {
-				it.maxProgress += 1
-				it.primaryProgress += 3
-				it.secondaryProgress += 6
-				it.layoutParams.width += 10
+				it.primaryProgress += 2
+				it.secondaryProgress += 3
 			}
 		},{
 			Log.d("MainAct", "${it.message}")
 		})
 	}
+	
+	
+	fun Resources.getColorCompat(resId: Int): Int {
+		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			getColor(resId, null)
+		}else{
+			getColor(resId)
+		}
+	}
+	
 }
