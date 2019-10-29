@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<color name="inkseekbar_primary_default">#008577</color>
+	<color name="inkseekbar_secondary_default">#00574B</color>
+	<color name="inkseekbar_background_default">#AAAAAA</color>
+</resources>

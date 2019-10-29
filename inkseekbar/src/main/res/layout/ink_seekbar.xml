@@ -9,19 +9,19 @@
 		android:id="@+id/background"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
-		android:background="#F0F"
+		android:background="@color/inkseekbar_background_default"
 		/>
 	<View
 		android:id="@+id/progress_secondary"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
-		android:background="#0F0"
+		android:background="@color/inkseekbar_secondary_default"
 		/>
 	<View
 		android:id="@+id/progress_primary"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
-		android:background="#00F"
+		android:background="@color/inkseekbar_primary_default"
 		/>
 	<View
 		android:id="@+id/marker"
