@@ -32,26 +32,14 @@ class MainActivity : AppCompatActivity() {
 			clear()
 			add(resources.getColorCompat(R.color.colorPrimaryDark))
 		}
-		inkSeekbar?.backgroundCornerRadii?.apply {
-			clear()
-			add(16f)
-		}
-		inkSeekbar?.primaryCornerRadii?.apply {
-			clear()
-			add(16f)
-		}
-		inkSeekbar?.secondaryCornerRadii?.apply {
-			clear()
-			add(16f)
-		}
-		inkSeekbar?.primaryMargin = 5
-		inkSeekbar?.secondaryMargin = 10
+		inkSeekbar?.generalCornerRadii = listOf(32f)
 		inkSeekbar?.updateColors()
-		Observable.interval(1, TimeUnit.SECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
+		inkSeekbar?.maxProgress = 10000
+		Observable.interval(10, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
 			Log.d("MainAct", "step")
 			inkSeekbar?.let {
-				it.primaryProgress += 2
-				it.secondaryProgress += 3
+				it.primaryProgress += 1
+				it.secondaryProgress += 2
 			}
 		},{
 			Log.d("MainAct", "${it.message}")
@@ -59,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 	}
 	
 	
-	fun Resources.getColorCompat(resId: Int): Int {
+	private fun Resources.getColorCompat(resId: Int): Int {
 		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 			getColor(resId, null)
 		}else{

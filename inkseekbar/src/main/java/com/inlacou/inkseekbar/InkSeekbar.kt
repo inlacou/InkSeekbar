@@ -53,16 +53,17 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 	val primaryPercentage get() =  primaryProgress.toDouble()/maxProgress
 	val secondaryPercentage get() = secondaryProgress.toDouble()/maxProgress
 	
+	var generalCornerRadii: List<Float>? = null
 	val backgroundColors: MutableList<Int> = mutableListOf()
 	var backgroundOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
-	var backgroundCornerRadii: MutableList<Float> = mutableListOf()
+	var backgroundCornerRadii: List<Float>? = null
 	val primaryColors: MutableList<Int> = mutableListOf()
 	var primaryOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
-	var primaryCornerRadii: MutableList<Float> = mutableListOf()
+	var primaryCornerRadii: List<Float>? = null
 	var primaryMargin: Int = 0
 	val secondaryColors: MutableList<Int> = mutableListOf()
 	var secondaryOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
-	var secondaryCornerRadii: MutableList<Float> = mutableListOf()
+	var secondaryCornerRadii: List<Float>? = null
 	var secondaryMargin: Int = 0
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
@@ -148,9 +149,9 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 	}
 	
 	fun updateColors() {
-		updateColors(background, backgroundOrientation, backgroundColors, backgroundCornerRadii)
-		updateColors(progressPrimary, primaryOrientation, primaryColors, primaryCornerRadii)
-		updateColors(progressSecondary, secondaryOrientation, secondaryColors, secondaryCornerRadii)
+		updateColors(background, backgroundOrientation, backgroundColors, backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
+		updateColors(progressPrimary, primaryOrientation, primaryColors, primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
+		updateColors(progressSecondary, secondaryOrientation, secondaryColors, secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(marker, markerOrientation, markerColors, markerCornerRadii)
 	}
 	
