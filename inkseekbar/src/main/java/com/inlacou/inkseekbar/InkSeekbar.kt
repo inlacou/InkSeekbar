@@ -67,7 +67,7 @@ class InkSeekbar: FrameLayout {
 	
 	//TODO add code to make this into a seekbar (optional ofc, it must also be able to work as a progressbar)
 	
-	protected open fun readAttrs(attrs: AttributeSet) {
+	private fun readAttrs(attrs: AttributeSet) {
 		Log.d("InkSeekbar", "readAttrs")
 		val ta = context.obtainStyledAttributes(attrs, R.styleable.InkSeekbar, 0, 0)
 		try {
@@ -134,7 +134,39 @@ class InkSeekbar: FrameLayout {
 					secondaryColors.apply { clear(); add(aux) }
 				}
 			}
-			
+			if (ta.hasValue(R.styleable.InkSeekbar_backgroundColors)) {
+				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_backgroundColors, -1)).toList().let {
+					if(it.isNotEmpty()) {
+						backgroundColors.clear()
+						it.forEach { backgroundColors.add(it) }
+					}
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_primaryColors)) {
+				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_primaryColors, -1)).toList().let {
+					if(it.isNotEmpty()) {
+						primaryColors.clear()
+						it.forEach { primaryColors.add(it) }
+					}
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_secondaryColor)) {
+				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_secondaryColor, -1)).toList().let {
+					if(it.isNotEmpty()) {
+						secondaryColors.clear()
+						it.forEach { secondaryColors.add(it) }
+					}
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_backgroundGradientOrientation)) {
+				backgroundOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_backgroundGradientOrientation, 0)]
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_primaryGradientOrientation)) {
+				primaryOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_primaryGradientOrientation, 0)]
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_secondaryGradientOrientation)) {
+				secondaryOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_secondaryGradientOrientation, 0)]
+			}
 		} finally {
 			ta.recycle()
 		}
