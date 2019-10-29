@@ -45,6 +45,7 @@
 		app:primaryColors="@array/blue_gradient_reverse"
 		app:primaryGradientOrientation="LEFT_RIGHT"
 		app:corners="16dp"
+		app:secondaryMargin="4dp"
 		app:orientation="LEFT_RIGHT"
 		android:layout_marginTop="10dp"
 		/>

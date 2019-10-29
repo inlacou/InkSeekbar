@@ -32,12 +32,14 @@ class InkSeekbar: FrameLayout {
 		set(value) {
 			field = if(value>maxProgress) maxProgress
 			else value
+			//TODO maybe separate public and private setter to be able to call listener on value change (user interaction = false)
 			updateDimensions()
 		}
 	var secondaryProgress = 0
 		set(value) {
 			field = if(value>maxProgress) maxProgress
 			else value
+			//TODO maybe separate public and private setter to be able to call listener on value change (user interaction = false)
 			updateDimensions()
 		}
 	var maxProgress = 300
@@ -64,8 +66,6 @@ class InkSeekbar: FrameLayout {
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
 	var markerCornerRadii: MutableList<Float> = mutableListOf()
-	
-	//TODO add code to make this into a seekbar (optional ofc, it must also be able to work as a progressbar)
 	
 	private fun readAttrs(attrs: AttributeSet) {
 		Log.d("InkSeekbar", "readAttrs")
@@ -175,18 +175,18 @@ class InkSeekbar: FrameLayout {
 		updateColors()
 	}
 	
-	private val totalSize: Int get() = when(orientation){
+	private val totalSize: Float get() = when(orientation){
 		TOP_DOWN, DOWN_TOP -> {
 			backgroundView?.let {
-				it.height-((primaryMargin+secondaryMargin)*2).toInt()
-			} ?: 0
+				it.height-((primaryMargin+secondaryMargin)*2)
+			} ?: 0f
 		}
 		LEFT_RIGHT, RIGHT_LEFT ->
 			backgroundView?.let {
-				it.width-((primaryMargin+secondaryMargin)*2).toInt()
-			} ?: 0
+				it.width-((primaryMargin+secondaryMargin)*2)
+			} ?: 0f
 	}
-	private val stepSize: Int get() = totalSize/maxProgress
+	private val stepSize: Float get() = totalSize/maxProgress
 	private val reversed: Boolean get() = orientation==DOWN_TOP || orientation==RIGHT_LEFT
 	
 	init {
@@ -212,16 +212,13 @@ class InkSeekbar: FrameLayout {
 				TOP_DOWN, DOWN_TOP -> event.y
 				LEFT_RIGHT, RIGHT_LEFT -> event.x
 			} //reaches 0 at top and goes on the minus realm if you keep going up
-			val roughStep = if(reversed) (relativePosition/stepSize)-1 else (relativePosition/stepSize)
-			val step = (relativePosition/stepSize).roundToInt()
-			Log.d("touchListener", "step: $step | roughStep: $roughStep")
-			val newPosition = step //TODO calculate new position
+			val fixedRelativePosition = relativePosition-primaryMargin-secondaryMargin //Fix touch
+			//val roughStep = if(reversed) (fixedRelativePosition/stepSize)-1 else (fixedRelativePosition/stepSize)
+			val newPosition = (fixedRelativePosition/stepSize).roundToInt() //TODO if(reversed)
 			if(primaryProgress!=newPosition) {
-				//TODO change and fire listener value change
-				//controller.onCurrentItemChanged(newPosition, true)
+				//TODO fire listener value change (user interaction true)
 			}
 			primaryProgress = newPosition
-			//TODO update updateDisplays(event.action== MotionEvent.ACTION_MOVE || event.action== MotionEvent.ACTION_DOWN)
 			
 			when(event.action){
 				MotionEvent.ACTION_DOWN -> {
@@ -230,7 +227,7 @@ class InkSeekbar: FrameLayout {
 				}
 				MotionEvent.ACTION_CANCEL -> false
 				MotionEvent.ACTION_UP -> {
-					//TODO fire listener release controller.onTouchRelease()
+					//TODO fire listener release (user interaction true)
 					false
 				}
 				MotionEvent.ACTION_MOVE -> true
