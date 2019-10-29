@@ -51,10 +51,6 @@ class MainActivity : AppCompatActivity() {
 				it.primaryProgress += 1
 				it.secondaryProgress += 2
 			}
-			inkseekbar_left_right?.let {
-				it.primaryProgress += 1
-				it.secondaryProgress += 2
-			}
 			inkseekbar_right_left?.let {
 				it.primaryProgress += 1
 				it.secondaryProgress += 2

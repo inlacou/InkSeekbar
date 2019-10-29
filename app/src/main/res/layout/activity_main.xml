@@ -28,6 +28,8 @@
 			app:backgroundColor="@color/basic_grey"
 			app:primaryColors="@array/blue_gradient"
 			app:secondaryColor="@color/colorPrimaryDark"
+			tools:maxProgress="100"
+			tools:primaryProgress="50"
 			app:corners="16dp"
 			app:primaryMargin="4dp"
 			app:orientation="DOWN_TOP"
@@ -43,7 +45,6 @@
 		app:primaryColors="@array/blue_gradient_reverse"
 		app:primaryGradientOrientation="LEFT_RIGHT"
 		app:corners="16dp"
-		app:secondaryMargin="4dp"
 		app:orientation="LEFT_RIGHT"
 		android:layout_marginTop="10dp"
 		/>

@@ -1,26 +1,26 @@
 package com.inlacou.inkseekbar
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.net.wifi.WifiConfiguration
-import android.provider.SyncStateContract.Helpers.update
 import android.util.AttributeSet
 import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import com.inlacou.inkseekbar.Orientation.*
+import kotlin.math.roundToInt
 
 class InkSeekbar: FrameLayout {
 	constructor(context: Context) : super(context)
 	constructor(context: Context, attrSet: AttributeSet) : super(context, attrSet) { readAttrs(attrSet) }
 	constructor(context: Context, attrSet: AttributeSet, arg: Int) : super(context, attrSet, arg) { readAttrs(attrSet) }
 	
-	private var background: View? = null
-	private var progressPrimary: View? = null
-	private var progressSecondary: View? = null
+	private var backgroundView: View? = null
+	private var progressPrimaryView: View? = null
+	private var progressSecondaryView: View? = null
 	private var marker: View? = null
 	
 	var lineWidth = 100
@@ -175,102 +175,151 @@ class InkSeekbar: FrameLayout {
 		updateColors()
 	}
 	
+	private val totalSize: Int get() = when(orientation){
+		TOP_DOWN, DOWN_TOP -> {
+			backgroundView?.let {
+				it.height-((primaryMargin+secondaryMargin)*2).toInt()
+			} ?: 0
+		}
+		LEFT_RIGHT, RIGHT_LEFT ->
+			backgroundView?.let {
+				it.width-((primaryMargin+secondaryMargin)*2).toInt()
+			} ?: 0
+	}
+	private val stepSize: Int get() = totalSize/maxProgress
+	private val reversed: Boolean get() = orientation==DOWN_TOP || orientation==RIGHT_LEFT
+	
 	init {
 		Log.d("InkSeekbar", "init")
 		val rootView = View.inflate(context, R.layout.ink_seekbar, this)
-		background = rootView.findViewById(R.id.background)
-		progressPrimary = rootView.findViewById(R.id.progress_primary)
-		progressSecondary = rootView.findViewById(R.id.progress_secondary)
+		backgroundView = rootView.findViewById(R.id.background)
+		progressPrimaryView = rootView.findViewById(R.id.progress_primary)
+		progressSecondaryView = rootView.findViewById(R.id.progress_secondary)
 		marker = rootView.findViewById(R.id.marker)
-		background?.let {
+		backgroundView?.let {
 			it.onDrawn(false) {
 				updateDimensions2()
 			}
 		}
+		setListeners()
 		updateDimensions()
+	}
+	
+	@SuppressLint("ClickableViewAccessibility")
+	private fun setListeners() {
+		backgroundView?.setOnTouchListener { _, event ->
+			val relativePosition = when(orientation){
+				TOP_DOWN, DOWN_TOP -> event.y
+				LEFT_RIGHT, RIGHT_LEFT -> event.x
+			} //reaches 0 at top and goes on the minus realm if you keep going up
+			val roughStep = if(reversed) (relativePosition/stepSize)-1 else (relativePosition/stepSize)
+			val step = (relativePosition/stepSize).roundToInt()
+			Log.d("touchListener", "step: $step | roughStep: $roughStep")
+			val newPosition = step //TODO calculate new position
+			if(primaryProgress!=newPosition) {
+				//TODO change and fire listener value change
+				//controller.onCurrentItemChanged(newPosition, true)
+			}
+			primaryProgress = newPosition
+			//TODO update updateDisplays(event.action== MotionEvent.ACTION_MOVE || event.action== MotionEvent.ACTION_DOWN)
+			
+			when(event.action){
+				MotionEvent.ACTION_DOWN -> {
+					attemptClaimDrag()
+					true
+				}
+				MotionEvent.ACTION_CANCEL -> false
+				MotionEvent.ACTION_UP -> {
+					//TODO fire listener release controller.onTouchRelease()
+					false
+				}
+				MotionEvent.ACTION_MOVE -> true
+				else -> false
+			}
+		}
 	}
 	
 	private fun updateDimensions() {
 		when(orientation) {
 			TOP_DOWN, DOWN_TOP -> {
-				centerHorizontal(background)
-				centerHorizontal(progressPrimary)
-				centerHorizontal(progressSecondary)
+				centerHorizontal(backgroundView)
+				centerHorizontal(progressPrimaryView)
+				centerHorizontal(progressSecondaryView)
 				if(orientation==TOP_DOWN) {
-					alignParentTop(progressPrimary)
-					alignParentTop(progressSecondary)
+					alignParentTop(progressPrimaryView)
+					alignParentTop(progressSecondaryView)
 				}else{
-					alignParentBottom(progressPrimary)
-					alignParentBottom(progressSecondary)
+					alignParentBottom(progressPrimaryView)
+					alignParentBottom(progressSecondaryView)
 				}
-				background?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
-				background?.layoutParams?.width  = lineWidth
-				progressPrimary?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
-				progressSecondary?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
+				backgroundView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
+				backgroundView?.layoutParams?.width  = lineWidth
+				progressPrimaryView?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
+				progressSecondaryView?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
 			}
 			LEFT_RIGHT, RIGHT_LEFT -> {
-				centerVertical(background)
-				centerVertical(progressPrimary)
-				centerVertical(progressSecondary)
+				centerVertical(backgroundView)
+				centerVertical(progressPrimaryView)
+				centerVertical(progressSecondaryView)
 				if(orientation==LEFT_RIGHT) {
-					alignParentLeft(progressPrimary)
-					alignParentLeft(progressSecondary)
+					alignParentLeft(progressPrimaryView)
+					alignParentLeft(progressSecondaryView)
 				}else{
-					alignParentRight(progressPrimary)
-					alignParentRight(progressSecondary)
+					alignParentRight(progressPrimaryView)
+					alignParentRight(progressSecondaryView)
 				}
-				background?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
-				background?.layoutParams?.height = lineWidth
-				progressPrimary?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
-				progressSecondary?.layoutParams?.height = (lineWidth-(secondaryMargin*2)).toInt()
+				backgroundView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
+				backgroundView?.layoutParams?.height = lineWidth
+				progressPrimaryView?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
+				progressSecondaryView?.layoutParams?.height = (lineWidth-(secondaryMargin*2)).toInt()
 			}
 		}
 		updateDimensions2()
 	}
 	
 	private fun updateDimensions2(){
-		background?.let {
+		backgroundView?.let {
 			when (orientation) {
 				TOP_DOWN, DOWN_TOP -> {
 					val newPrimary = ((it.height-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.height-(secondaryMargin*2)) * secondaryPercentage).toInt()
-					if (progressPrimary?.layoutParams?.height != newPrimary) progressPrimary?.layoutParams?.height = newPrimary
-					if (progressSecondary?.layoutParams?.height != newPrimary) progressSecondary?.layoutParams?.height = newSecondary
+					if (progressPrimaryView?.layoutParams?.height != newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
+					if (progressSecondaryView?.layoutParams?.height != newPrimary) progressSecondaryView?.layoutParams?.height = newSecondary
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
 					val newPrimary = ((it.width-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.width-(secondaryMargin*2)) * secondaryPercentage).toInt()
-					if (progressPrimary?.layoutParams?.width != newPrimary) progressPrimary?.layoutParams?.width = newPrimary
-					if (progressSecondary?.layoutParams?.width != newPrimary) progressSecondary?.layoutParams?.width = newSecondary
+					if (progressPrimaryView?.layoutParams?.width != newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
+					if (progressSecondaryView?.layoutParams?.width != newPrimary) progressSecondaryView?.layoutParams?.width = newSecondary
 				}
 			}
 			when(orientation){
 				TOP_DOWN -> {
-					progressPrimary?.setMargins(top = (primaryMargin+secondaryMargin).toInt())
-					progressSecondary?.setMargins(top = (secondaryMargin).toInt())
+					progressPrimaryView?.setMargins(top = (primaryMargin+secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(top = (secondaryMargin).toInt())
 				}
 				DOWN_TOP -> {
-					progressPrimary?.setMargins(bottom = (primaryMargin+secondaryMargin).toInt())
-					progressSecondary?.setMargins(bottom = (secondaryMargin).toInt())
+					progressPrimaryView?.setMargins(bottom = (primaryMargin+secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(bottom = (secondaryMargin).toInt())
 				}
 				LEFT_RIGHT -> {
-					progressPrimary?.setMargins(left = (primaryMargin+secondaryMargin).toInt())
-					progressSecondary?.setMargins(left = (secondaryMargin).toInt())
+					progressPrimaryView?.setMargins(left = (primaryMargin+secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(left = (secondaryMargin).toInt())
 				}
 				RIGHT_LEFT -> {
-					progressPrimary?.setMargins(right = (primaryMargin+secondaryMargin).toInt())
-					progressSecondary?.setMargins(right = (secondaryMargin).toInt())
+					progressPrimaryView?.setMargins(right = (primaryMargin+secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(right = (secondaryMargin).toInt())
 				}
 			}
-			progressPrimary?.requestLayout()
-			progressSecondary?.requestLayout()
+			progressPrimaryView?.requestLayout()
+			progressSecondaryView?.requestLayout()
 		}
 	}
 	
 	fun updateColors() {
-		updateColors(background, backgroundOrientation, backgroundColors, backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
-		updateColors(progressPrimary, primaryOrientation, primaryColors, primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
-		updateColors(progressSecondary, secondaryOrientation, secondaryColors, secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
+		updateColors(backgroundView, backgroundOrientation, backgroundColors, backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
+		updateColors(progressPrimaryView, primaryOrientation, primaryColors, primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
+		updateColors(progressSecondaryView, secondaryOrientation, secondaryColors, secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(marker, markerOrientation, markerColors, markerCornerRadii)
 	}
 	
@@ -351,6 +400,14 @@ class InkSeekbar: FrameLayout {
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
 			}
 		}
+	}
+	
+	/**
+	 * Tries to claim the user's drag motion, and requests disallowing any
+	 * ancestors from stealing events in the drag.
+	 */
+	private fun attemptClaimDrag() {
+		parent?.requestDisallowInterceptTouchEvent(true)
 	}
 	
 }
