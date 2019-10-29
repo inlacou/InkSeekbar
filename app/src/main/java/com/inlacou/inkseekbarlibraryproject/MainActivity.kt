@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_main)
 		inkSeekbar = findViewById(R.id.inkseekbar)
-		inkSeekbar?.orientation = Orientation.LEFT_RIGHT
+		inkSeekbar?.orientation = Orientation.TOP_DOWN
 		inkSeekbar?.backgroundColors?.apply {
 			clear()
 			add(resources.getColorCompat(R.color.basic_black))
@@ -37,9 +37,11 @@ class MainActivity : AppCompatActivity() {
 			add(resources.getColorCompat(R.color.colorPrimaryDark))
 		}
 		inkSeekbar?.generalCornerRadii = listOf(32f)
+		inkSeekbar?.primaryMargin = 10
+		inkSeekbar?.secondaryMargin = 15
 		inkSeekbar?.updateColors()
 		inkSeekbar?.maxProgress = 100
-		Observable.interval(1000, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
+		Observable.interval(100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
 			inkSeekbar?.let {
 				it.primaryProgress += 1
 				it.secondaryProgress += 2
