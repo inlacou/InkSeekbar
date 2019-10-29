@@ -28,20 +28,14 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 		}
 	var primaryProgress = 0
 		set(value) {
-			field = if(value>maxProgress){
-				maxProgress
-			}else{
-				value
-			}
+			field = if(value>maxProgress) maxProgress
+			else value
 			updateDimensions()
 		}
 	var secondaryProgress = 0
 		set(value) {
-			field = if(value>maxProgress){
-				maxProgress
-			}else{
-				value
-			}
+			field = if(value>maxProgress) maxProgress
+			else value
 			updateDimensions()
 		}
 	var maxProgress = 300
@@ -88,18 +82,32 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 	private fun updateDimensions() {
 		when(orientation) {
 			TOP_DOWN, DOWN_TOP -> {
-				centerVertical(background)
-				centerVertical(progressPrimary)
-				centerVertical(progressSecondary)
+				centerHorizontal(background)
+				centerHorizontal(progressPrimary)
+				centerHorizontal(progressSecondary)
+				if(orientation==TOP_DOWN) {
+					alignParentTop(progressPrimary)
+					alignParentTop(progressSecondary)
+				}else{
+					alignParentBottom(progressPrimary)
+					alignParentBottom(progressSecondary)
+				}
 				background?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				background?.layoutParams?.width  = lineWidth
 				progressPrimary?.layoutParams?.width   = lineWidth-((primaryMargin+secondaryMargin)*2)
 				progressSecondary?.layoutParams?.width = lineWidth-(secondaryMargin*2)
 			}
 			LEFT_RIGHT, RIGHT_LEFT -> {
-				centerHorizontal(background)
-				centerHorizontal(progressPrimary)
-				centerHorizontal(progressSecondary)
+				centerVertical(background)
+				centerVertical(progressPrimary)
+				centerVertical(progressSecondary)
+				if(orientation==LEFT_RIGHT) {
+					alignParentLeft(progressPrimary)
+					alignParentLeft(progressSecondary)
+				}else{
+					alignParentRight(progressPrimary)
+					alignParentRight(progressSecondary)
+				}
 				background?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
 				background?.layoutParams?.height = lineWidth
 				progressPrimary?.layoutParams?.height   = lineWidth-((primaryMargin+secondaryMargin)*2)
@@ -115,12 +123,14 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 				TOP_DOWN, DOWN_TOP -> {
 					val newPrimary = ((it.height-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.height-(secondaryMargin*2)) * secondaryPercentage).toInt()
+					Log.d("InkSeekbar", "newPrimary: $newPrimary | newSecondary: $newSecondary")
 					if (progressPrimary?.layoutParams?.height != newPrimary) progressPrimary?.layoutParams?.height = newPrimary
 					if (progressSecondary?.layoutParams?.height != newPrimary) progressSecondary?.layoutParams?.height = newSecondary
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
 					val newPrimary = ((it.width-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.width-(secondaryMargin*2)) * secondaryPercentage).toInt()
+					Log.d("InkSeekbar", "newPrimary: $newPrimary | newSecondary: $newSecondary")
 					if (progressPrimary?.layoutParams?.width != newPrimary) progressPrimary?.layoutParams?.width = newPrimary
 					if (progressSecondary?.layoutParams?.width != newPrimary) progressSecondary?.layoutParams?.width = newSecondary
 				}
@@ -186,7 +196,7 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 		}
 	}
 	
-	private fun centerVertical(view: View?) {
+	private fun centerHorizontal(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
 				layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
@@ -194,7 +204,7 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 		}
 	}
 	
-	private fun centerHorizontal(view: View?){
+	private fun centerVertical(view: View?){
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
 				layoutParams.addRule(RelativeLayout.CENTER_VERTICAL)
@@ -202,8 +212,43 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 		}
 	}
 	
+	private fun alignParentTop(view: View?) {
+		view?.layoutParams?.let { layoutParams ->
+			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
+			}
+		}
+	}
+	
+	private fun alignParentBottom(view: View?) {
+		view?.layoutParams?.let { layoutParams ->
+			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+			}
+		}
+	}
+	
+	private fun alignParentLeft(view: View?) {
+		view?.layoutParams?.let { layoutParams ->
+			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
+			}
+		}
+	}
+	
+	private fun alignParentRight(view: View?) {
+		view?.layoutParams?.let { layoutParams ->
+			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+			}
+		}
+	}
+	
 }
 
 enum class Orientation {
-	TOP_DOWN, DOWN_TOP, LEFT_RIGHT, RIGHT_LEFT
+	TOP_DOWN,
+	DOWN_TOP,
+	LEFT_RIGHT,
+	/** Not working */ RIGHT_LEFT
 }
