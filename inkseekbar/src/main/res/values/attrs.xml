@@ -12,16 +12,26 @@
        limitations under the License.
 -->
 <resources>
+	<declare-styleable name="InkSeekbar">
+		<attr name="backgroundColor" format="color|reference"/>
+		<attr name="primaryColor" format="color|reference"/>
+		<attr name="secondaryColor" format="color|reference"/>
+		<attr name="corners" format="dimension|reference"/>
+		<attr name="backgroundCorners" format="dimension|reference"/>
+		<attr name="primaryCorners" format="dimension|reference"/>
+		<attr name="secondaryCorners" format="dimension|reference"/>
 
-	<declare-styleable name="VerticalSeekBar">
-		<attr name="seekBarRotation">
-			<enum name="CW0" value="0" />
-			<!-- Clock wise - 90 deg; top = min, bottom = max -->
-			<enum name="CW90" value="90" />
-			<enum name="CW180" value="180" />
-			<!-- Clock wise - 270 deg; bottom = min, top = max -->
-			<enum name="CW270" value="270" />
+		<attr name="lineWidth" format="integer"/>
+		<attr name="primaryMargin" format="dimension|reference"/>
+		<attr name="secondaryMargin" format="dimension|reference"/>
+		<attr name="primaryProgress" format="integer"/>
+		<attr name="secondaryProgress" format="integer"/>
+		<attr name="maxProgress" format="integer"/>
+		<attr name="orientation">
+			<enum name="TOP_DOWN" value="0" />
+			<enum name="DOWN_TOP" value="1" />
+			<enum name="LEFT_RIGHT" value="2" />
+			<enum name="RIGHT_LEFT" value="3" />
 		</attr>
 	</declare-styleable>
-
 </resources>

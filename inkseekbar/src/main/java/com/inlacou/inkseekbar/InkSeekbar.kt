@@ -13,8 +13,10 @@ import android.widget.FrameLayout
 import android.widget.RelativeLayout
 import com.inlacou.inkseekbar.Orientation.*
 
-class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
-	: FrameLayout(context, attrs, defStyleAttr) {
+class InkSeekbar: FrameLayout {
+	constructor(context: Context) : super(context)
+	constructor(context: Context, attrSet: AttributeSet) : super(context, attrSet) { readAttrs(attrSet) }
+	constructor(context: Context, attrSet: AttributeSet, arg: Int) : super(context, attrSet, arg) { readAttrs(attrSet) }
 	
 	private var background: View? = null
 	private var progressPrimary: View? = null
@@ -54,18 +56,95 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 	val primaryColors: MutableList<Int> = mutableListOf()
 	var primaryOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
 	var primaryCornerRadii: List<Float>? = null
-	var primaryMargin: Int = 0
+	var primaryMargin: Float = 0f
 	val secondaryColors: MutableList<Int> = mutableListOf()
 	var secondaryOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
 	var secondaryCornerRadii: List<Float>? = null
-	var secondaryMargin: Int = 0
+	var secondaryMargin: Float = 0f
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
 	var markerCornerRadii: MutableList<Float> = mutableListOf()
 	
 	//TODO add code to make this into a seekbar (optional ofc, it must also be able to work as a progressbar)
 	
+	protected open fun readAttrs(attrs: AttributeSet) {
+		Log.d("InkSeekbar", "readAttrs")
+		val ta = context.obtainStyledAttributes(attrs, R.styleable.InkSeekbar, 0, 0)
+		try {
+			if (ta.hasValue(R.styleable.InkSeekbar_lineWidth)) {
+				lineWidth = ta.getInt(R.styleable.InkSeekbar_lineWidth, lineWidth)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_maxProgress)) {
+				maxProgress = ta.getInt(R.styleable.InkSeekbar_maxProgress, maxProgress)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_primaryProgress)) {
+				primaryProgress = ta.getInt(R.styleable.InkSeekbar_primaryProgress, primaryProgress)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_secondaryProgress)) {
+				secondaryProgress = ta.getInt(R.styleable.InkSeekbar_secondaryProgress, secondaryProgress)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_orientation)) {
+				orientation = values()[ta.getInt(R.styleable.InkSeekbar_orientation, LEFT_RIGHT.ordinal)]
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_primaryMargin)) {
+				primaryMargin = ta.getDimension(R.styleable.InkSeekbar_primaryMargin, primaryMargin)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_secondaryMargin)) {
+				secondaryMargin = ta.getDimension(R.styleable.InkSeekbar_secondaryMargin, secondaryMargin)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_corners)) {
+				val aux = ta.getDimension(R.styleable.InkSeekbar_corners, -10f)
+				if(aux!=-10f) {
+					generalCornerRadii = listOf(aux)
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_backgroundCorners)) {
+				val aux = ta.getDimension(R.styleable.InkSeekbar_backgroundCorners, -10f)
+				if(aux!=-10f) {
+					backgroundCornerRadii = listOf(aux)
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_primaryCorners)) {
+				val aux = ta.getDimension(R.styleable.InkSeekbar_primaryCorners, -10f)
+				if(aux!=-10f) {
+					primaryCornerRadii = listOf(aux)
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_secondaryCorners)) {
+				val aux = ta.getDimension(R.styleable.InkSeekbar_secondaryCorners, -10f)
+				if(aux!=-10f) {
+					secondaryCornerRadii = listOf(aux)
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_backgroundColor)) {
+				val aux = ta.getColor(R.styleable.InkSeekbar_backgroundColor, -1)
+				if(aux!=-1) {
+					backgroundColors.apply { clear(); add(aux) }
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_primaryColor)) {
+				val aux = ta.getColor(R.styleable.InkSeekbar_primaryColor, -1)
+				if(aux!=-1) {
+					primaryColors.apply { clear(); add(aux) }
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_secondaryColor)) {
+				val aux = ta.getColor(R.styleable.InkSeekbar_secondaryColor, -1)
+				if(aux!=-1) {
+					secondaryColors.apply { clear(); add(aux) }
+				}
+			}
+			
+		} finally {
+			ta.recycle()
+		}
+		updateDimensions()
+		updateDimensions2()
+		updateColors()
+	}
+	
 	init {
+		Log.d("InkSeekbar", "init")
 		val rootView = View.inflate(context, R.layout.ink_seekbar, this)
 		background = rootView.findViewById(R.id.background)
 		progressPrimary = rootView.findViewById(R.id.progress_primary)
@@ -94,8 +173,8 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 				}
 				background?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				background?.layoutParams?.width  = lineWidth
-				progressPrimary?.layoutParams?.width   = lineWidth-((primaryMargin+secondaryMargin)*2)
-				progressSecondary?.layoutParams?.width = lineWidth-(secondaryMargin*2)
+				progressPrimary?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
+				progressSecondary?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
 			}
 			LEFT_RIGHT, RIGHT_LEFT -> {
 				centerVertical(background)
@@ -110,8 +189,8 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 				}
 				background?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
 				background?.layoutParams?.height = lineWidth
-				progressPrimary?.layoutParams?.height   = lineWidth-((primaryMargin+secondaryMargin)*2)
-				progressSecondary?.layoutParams?.height = lineWidth-(secondaryMargin*2)
+				progressPrimary?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
+				progressSecondary?.layoutParams?.height = (lineWidth-(secondaryMargin*2)).toInt()
 			}
 		}
 		updateDimensions2()
@@ -123,34 +202,32 @@ class InkSeekbar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 				TOP_DOWN, DOWN_TOP -> {
 					val newPrimary = ((it.height-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.height-(secondaryMargin*2)) * secondaryPercentage).toInt()
-					Log.d("InkSeekbar", "newPrimary: $newPrimary | newSecondary: $newSecondary")
 					if (progressPrimary?.layoutParams?.height != newPrimary) progressPrimary?.layoutParams?.height = newPrimary
 					if (progressSecondary?.layoutParams?.height != newPrimary) progressSecondary?.layoutParams?.height = newSecondary
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
 					val newPrimary = ((it.width-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.width-(secondaryMargin*2)) * secondaryPercentage).toInt()
-					Log.d("InkSeekbar", "newPrimary: $newPrimary | newSecondary: $newSecondary")
 					if (progressPrimary?.layoutParams?.width != newPrimary) progressPrimary?.layoutParams?.width = newPrimary
 					if (progressSecondary?.layoutParams?.width != newPrimary) progressSecondary?.layoutParams?.width = newSecondary
 				}
 			}
 			when(orientation){
 				TOP_DOWN -> {
-					progressPrimary?.setMargins(top = primaryMargin+secondaryMargin)
-					progressSecondary?.setMargins(top = secondaryMargin)
+					progressPrimary?.setMargins(top = (primaryMargin+secondaryMargin).toInt())
+					progressSecondary?.setMargins(top = (secondaryMargin).toInt())
 				}
 				DOWN_TOP -> {
-					progressPrimary?.setMargins(bottom = primaryMargin+secondaryMargin)
-					progressSecondary?.setMargins(bottom = secondaryMargin)
+					progressPrimary?.setMargins(bottom = (primaryMargin+secondaryMargin).toInt())
+					progressSecondary?.setMargins(bottom = (secondaryMargin).toInt())
 				}
 				LEFT_RIGHT -> {
-					progressPrimary?.setMargins(left = primaryMargin+secondaryMargin)
-					progressSecondary?.setMargins(left = secondaryMargin)
+					progressPrimary?.setMargins(left = (primaryMargin+secondaryMargin).toInt())
+					progressSecondary?.setMargins(left = (secondaryMargin).toInt())
 				}
 				RIGHT_LEFT -> {
-					progressPrimary?.setMargins(right = primaryMargin+secondaryMargin)
-					progressSecondary?.setMargins(right = secondaryMargin)
+					progressPrimary?.setMargins(right = (primaryMargin+secondaryMargin).toInt())
+					progressSecondary?.setMargins(right = (secondaryMargin).toInt())
 				}
 			}
 			progressPrimary?.requestLayout()
