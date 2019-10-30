@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.method.TextKeyListener.clear
 import android.util.Log
+import android.widget.Toast
 import com.inlacou.inkseekbar.InkSeekbar
 import com.inlacou.inkseekbar.Orientation
 import io.reactivex.Observable
@@ -44,20 +45,24 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_right_left?.maxProgress = maxProgress
 		Observable.interval(100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
 			inkseekbar_top_down?.let {
-				it.primaryProgress += 1
-				it.secondaryProgress += 2
+				it.setPrimaryProgress(it.primaryProgress+1, false)
+				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
 			inkseekbar_down_top?.let {
-				it.primaryProgress += 1
-				it.secondaryProgress += 2
+				it.setPrimaryProgress(it.primaryProgress+1, false)
+				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
 			inkseekbar_right_left?.let {
-				it.primaryProgress += 1
-				it.secondaryProgress += 2
+				it.setPrimaryProgress(it.primaryProgress+1, false)
+				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
 		},{
 			Log.d("MainActObs", "${it.message}")
 		})
+		
+		inkseekbar_left_right?.onValueChangeListener = { primary, secondary ->
+			Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
+		}
 	}
 	
 	
