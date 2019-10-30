@@ -8,6 +8,7 @@
 	<color name="basic_grey_light">#DDD</color>
 	<color name="basic_grey">#AAAAAA</color>
 	<color name="basic_red">#F00</color>
+	<color name="basic_red_transparent">#8F00</color>
 	<color name="basic_red_dark">#A00</color>
 	<color name="basic_pink">#F0F</color>
 	<color name="basic_green">#0F0</color>
