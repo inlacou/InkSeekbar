@@ -6,6 +6,10 @@ Library to make fancy seekbars. Has seekbar or progressbar modes.
 
 # Parametrization
 
+## By Code
+
+Example:
+
 ```Kt
 inkseekbar_top_down?.generalCornerRadii = listOf(32f)
 inkseekbar_top_down?.primaryMargin = 10f
