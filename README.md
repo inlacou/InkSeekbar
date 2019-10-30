@@ -6,7 +6,22 @@ Library to make fancy seekbars. Has seekbar or progressbar modes.
 
 # Parametrization
 
+```Kt
+inkseekbar_top_down?.generalCornerRadii = listOf(32f)
+inkseekbar_top_down?.primaryMargin = 10f
+inkseekbar_top_down?.secondaryMargin = 15f
+inkseekbar_top_down?.maxProgress = maxProgress
+inkseekbar_top_down?.backgroundColors?.apply {
+  clear()
+  add(resources.getColorCompat(R.color.basic_black))
+  add(resources.getColorCompat(R.color.basic_grey))
+}
+it.setPrimaryProgress(it.primaryProgress+1, fireListener = false)
+```
+
 ## By XML
+
+Example:
 
 ```XML
 app:backgroundColor="@color/basic_grey"
