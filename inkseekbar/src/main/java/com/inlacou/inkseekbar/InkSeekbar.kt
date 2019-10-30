@@ -189,7 +189,6 @@ class InkSeekbar: FrameLayout {
 	
 	private val stepSize: Float get() = totalSize/maxProgress
 	private val totalSteps: Int get() = (totalSize/stepSize).roundToInt()
-	private val reversed: Boolean get() = orientation==DOWN_TOP || orientation==RIGHT_LEFT
 	
 	init {
 		Log.d("InkSeekbar", "init")
@@ -216,7 +215,7 @@ class InkSeekbar: FrameLayout {
 			} //reaches 0 at top and goes on the minus realm if you keep going up
 			val fixedRelativePosition = relativePosition-primaryMargin-secondaryMargin //Fix touch
 			//val roughStep = if(reversed) (fixedRelativePosition/stepSize)-1 else (fixedRelativePosition/stepSize)
-			val newPosition = if(reversed) (totalSteps-(fixedRelativePosition/stepSize)).roundToInt() else (fixedRelativePosition/stepSize).roundToInt()
+			val newPosition = if(orientation==DOWN_TOP || orientation==RIGHT_LEFT) (totalSteps-(fixedRelativePosition/stepSize)).roundToInt() else (fixedRelativePosition/stepSize).roundToInt()
 			//val newPosition = (fixedRelativePosition/stepSize).roundToInt()
 			if(primaryProgress!=newPosition) {
 				//TODO fire listener value change (user interaction true)
