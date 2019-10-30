@@ -44,6 +44,7 @@
 		app:secondaryColor="@color/colorPrimaryDark"
 		app:primaryColors="@array/blue_gradient_reverse"
 		app:primaryGradientOrientation="LEFT_RIGHT"
+		app:mode="SEEKBAR"
 		app:corners="16dp"
 		app:secondaryMargin="4dp"
 		app:orientation="LEFT_RIGHT"

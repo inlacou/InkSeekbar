@@ -66,9 +66,9 @@ class InkSeekbar: FrameLayout {
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
 	var markerCornerRadii: MutableList<Float> = mutableListOf()
+	var mode: Mode = Mode.PROGRESS
 	
 	private fun readAttrs(attrs: AttributeSet) {
-		Log.d("InkSeekbar", "readAttrs")
 		val ta = context.obtainStyledAttributes(attrs, R.styleable.InkSeekbar, 0, 0)
 		try {
 			if (ta.hasValue(R.styleable.InkSeekbar_lineWidth)) {
@@ -167,6 +167,9 @@ class InkSeekbar: FrameLayout {
 			if (ta.hasValue(R.styleable.InkSeekbar_secondaryGradientOrientation)) {
 				secondaryOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_secondaryGradientOrientation, 0)]
 			}
+			if (ta.hasValue(R.styleable.InkSeekbar_mode)) {
+				mode = Mode.values()[ta.getInt(R.styleable.InkSeekbar_mode, 0)]
+			}
 		} finally {
 			ta.recycle()
 		}
@@ -191,7 +194,6 @@ class InkSeekbar: FrameLayout {
 	private val totalSteps: Int get() = (totalSize/stepSize).roundToInt()
 	
 	init {
-		Log.d("InkSeekbar", "init")
 		val rootView = View.inflate(context, R.layout.ink_seekbar, this)
 		backgroundView = rootView.findViewById(R.id.background)
 		progressPrimaryView = rootView.findViewById(R.id.progress_primary)
@@ -209,7 +211,9 @@ class InkSeekbar: FrameLayout {
 	@SuppressLint("ClickableViewAccessibility")
 	private fun setListeners() {
 		backgroundView?.setOnTouchListener { _, event ->
-			val relativePosition = when(orientation){
+			if(mode==Mode.PROGRESS) return@setOnTouchListener false
+			
+			val relativePosition = when(orientation) {
 				TOP_DOWN, DOWN_TOP -> event.y
 				LEFT_RIGHT, RIGHT_LEFT -> event.x
 			} //reaches 0 at top and goes on the minus realm if you keep going up
@@ -409,6 +413,11 @@ class InkSeekbar: FrameLayout {
 		parent?.requestDisallowInterceptTouchEvent(true)
 	}
 	
+}
+
+enum class Mode {
+	PROGRESS,
+	SEEKBAR
 }
 
 enum class Orientation {
