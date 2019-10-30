@@ -57,6 +57,11 @@
 			<enum name="TL_BR" value="7"/>
 		</attr>
 
+		<attr name="mode" format="enum">
+			<enum name="PROGRESS" value="0"/>
+			<enum name="SEEKBAR" value="1"/>
+		</attr>
+
 		<attr name="lineWidth" format="integer"/>
 		<attr name="primaryMargin" format="dimension|reference"/>
 		<attr name="secondaryMargin" format="dimension|reference"/>
