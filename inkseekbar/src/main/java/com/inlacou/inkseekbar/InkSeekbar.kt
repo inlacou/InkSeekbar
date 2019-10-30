@@ -38,20 +38,35 @@ class InkSeekbar: FrameLayout {
 			field = value
 			updateDimensions()
 		}
+	
+	fun setPrimaryProgress(value: Int, fireListener: Boolean) {
+		if(value>maxProgress){
+			primaryProgress = maxProgress
+		}
+		else {
+			primaryProgress = value
+			if(fireListener) onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+		}
+		updateDimensions()
+	}
+	
+	fun setSecondaryProgress(value: Int, fireListener: Boolean) {
+		if(value>maxProgress){
+			secondaryProgress = maxProgress
+		}
+		else {
+			secondaryProgress = value
+			if(fireListener) onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+		}
+		updateDimensions()
+	}
+	
+	var onValueChangeListener: ((primary: Int, secondary: Int) -> Unit)? = null
+	
 	var primaryProgress = 0
-		set(value) {
-			field = if(value>maxProgress) maxProgress
-			else value
-			//TODO maybe separate public and private setter to be able to call listener on value change (user interaction = false)
-			updateDimensions()
-		}
+		private set
 	var secondaryProgress = 0
-		set(value) {
-			field = if(value>maxProgress) maxProgress
-			else value
-			//TODO maybe separate public and private setter to be able to call listener on value change (user interaction = false)
-			updateDimensions()
-		}
+		private set
 	var maxProgress = 300
 		set(value) {
 			field = value
@@ -89,6 +104,7 @@ class InkSeekbar: FrameLayout {
 			if(aux>0) aux else 0f
 		}
 	}
+	
 	private val generalVerticalMargin: Float get() = if(mode==Mode.PROGRESS) 0f else when (orientation) {
 		TOP_DOWN, DOWN_TOP -> {
 			val aux = (markerWidth/2)-primaryMargin-secondaryMargin
@@ -99,6 +115,7 @@ class InkSeekbar: FrameLayout {
 			if(aux>0) aux else 0f
 		}
 	}
+	
 	private fun readAttrs(attrs: AttributeSet) {
 		val ta = context.obtainStyledAttributes(attrs, R.styleable.InkSeekbar, 0, 0)
 		try {
@@ -285,9 +302,9 @@ class InkSeekbar: FrameLayout {
 			val newPosition = if(orientation==DOWN_TOP || orientation==RIGHT_LEFT) (totalSteps-(fixedRelativePosition/stepSize)).roundToInt() else (fixedRelativePosition/stepSize).roundToInt()
 			//val newPosition = (fixedRelativePosition/stepSize).roundToInt()
 			if(primaryProgress!=newPosition) {
-				//TODO fire listener value change (user interaction true)
+				onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
 			}
-			primaryProgress = newPosition
+			setPrimaryProgress(newPosition, true)
 			
 			when(event.action){
 				MotionEvent.ACTION_DOWN -> {
