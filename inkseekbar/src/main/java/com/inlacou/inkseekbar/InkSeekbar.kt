@@ -21,9 +21,19 @@ class InkSeekbar: FrameLayout {
 	private var backgroundView: View? = null
 	private var progressPrimaryView: View? = null
 	private var progressSecondaryView: View? = null
-	private var marker: View? = null
+	private var markerView: View? = null
 	
-	var lineWidth = 100
+	var lineWidth = 100f
+		set(value) {
+			field = value
+			updateDimensions()
+		}
+	var markerWidth = 100f
+		set(value) {
+			field = value
+			updateDimensions()
+		}
+	var markerHeight = 100f
 		set(value) {
 			field = value
 			updateDimensions()
@@ -65,14 +75,20 @@ class InkSeekbar: FrameLayout {
 	var secondaryMargin: Float = 0f
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = GradientDrawable.Orientation.TOP_BOTTOM
-	var markerCornerRadii: MutableList<Float> = mutableListOf()
+	var markerCornerRadii: List<Float>? = null
 	var mode: Mode = Mode.PROGRESS
 	
 	private fun readAttrs(attrs: AttributeSet) {
 		val ta = context.obtainStyledAttributes(attrs, R.styleable.InkSeekbar, 0, 0)
 		try {
 			if (ta.hasValue(R.styleable.InkSeekbar_lineWidth)) {
-				lineWidth = ta.getInt(R.styleable.InkSeekbar_lineWidth, lineWidth)
+				lineWidth = ta.getDimension(R.styleable.InkSeekbar_lineWidth, lineWidth)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerWidth)) {
+				markerWidth = ta.getDimension(R.styleable.InkSeekbar_markerWidth, markerWidth)
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerHeight)) {
+				markerHeight = ta.getDimension(R.styleable.InkSeekbar_markerHeight, markerHeight)
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_maxProgress)) {
 				maxProgress = ta.getInt(R.styleable.InkSeekbar_maxProgress, maxProgress)
@@ -116,6 +132,12 @@ class InkSeekbar: FrameLayout {
 					secondaryCornerRadii = listOf(aux)
 				}
 			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerCorners)) {
+				val aux = ta.getDimension(R.styleable.InkSeekbar_markerCorners, -10f)
+				if(aux!=-10f) {
+					markerCornerRadii = listOf(aux)
+				}
+			}
 			if (ta.hasValue(R.styleable.InkSeekbar_backgroundColor)) {
 				val aux = ta.getColor(R.styleable.InkSeekbar_backgroundColor, -1)
 				if(aux!=-1) {
@@ -132,6 +154,12 @@ class InkSeekbar: FrameLayout {
 				val aux = ta.getColor(R.styleable.InkSeekbar_secondaryColor, -1)
 				if(aux!=-1) {
 					secondaryColors.apply { clear(); add(aux) }
+				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerColor)) {
+				val aux = ta.getColor(R.styleable.InkSeekbar_markerColor, -1)
+				if(aux!=-1) {
+					markerColors.apply { clear(); add(aux) }
 				}
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_backgroundColors)) {
@@ -158,6 +186,14 @@ class InkSeekbar: FrameLayout {
 					}
 				}
 			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerColor)) {
+				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_markerColor, -1)).toList().let {
+					if(it.isNotEmpty()) {
+						markerColors.clear()
+						it.forEach { markerColors.add(it) }
+					}
+				}
+			}
 			if (ta.hasValue(R.styleable.InkSeekbar_backgroundGradientOrientation)) {
 				backgroundOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_backgroundGradientOrientation, 0)]
 			}
@@ -166,6 +202,9 @@ class InkSeekbar: FrameLayout {
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_secondaryGradientOrientation)) {
 				secondaryOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_secondaryGradientOrientation, 0)]
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerGradientOrientation)) {
+				markerOrientation = GradientDrawable.Orientation.values()[ta.getInt(R.styleable.InkSeekbar_markerGradientOrientation, 0)]
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_mode)) {
 				mode = Mode.values()[ta.getInt(R.styleable.InkSeekbar_mode, 0)]
@@ -198,7 +237,7 @@ class InkSeekbar: FrameLayout {
 		backgroundView = rootView.findViewById(R.id.background)
 		progressPrimaryView = rootView.findViewById(R.id.progress_primary)
 		progressSecondaryView = rootView.findViewById(R.id.progress_secondary)
-		marker = rootView.findViewById(R.id.marker)
+		markerView = rootView.findViewById(R.id.marker)
 		backgroundView?.let {
 			it.onDrawn(false) {
 				updateDimensions2()
@@ -248,15 +287,20 @@ class InkSeekbar: FrameLayout {
 				centerHorizontal(backgroundView)
 				centerHorizontal(progressPrimaryView)
 				centerHorizontal(progressSecondaryView)
+				centerHorizontal(markerView)
 				if(orientation==TOP_DOWN) {
 					alignParentTop(progressPrimaryView)
 					alignParentTop(progressSecondaryView)
+					alignParentTop(markerView)
 				}else{
 					alignParentBottom(progressPrimaryView)
 					alignParentBottom(progressSecondaryView)
+					alignParentBottom(markerView)
 				}
+				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
+				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
+				backgroundView?.layoutParams?.width  = lineWidth.roundToInt()
 				backgroundView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
-				backgroundView?.layoutParams?.width  = lineWidth
 				progressPrimaryView?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
 				progressSecondaryView?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
 			}
@@ -264,15 +308,20 @@ class InkSeekbar: FrameLayout {
 				centerVertical(backgroundView)
 				centerVertical(progressPrimaryView)
 				centerVertical(progressSecondaryView)
+				centerVertical(markerView)
 				if(orientation==LEFT_RIGHT) {
 					alignParentLeft(progressPrimaryView)
 					alignParentLeft(progressSecondaryView)
+					alignParentLeft(markerView)
 				}else{
 					alignParentRight(progressPrimaryView)
 					alignParentRight(progressSecondaryView)
+					alignParentRight(markerView)
 				}
+				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
+				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				backgroundView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
-				backgroundView?.layoutParams?.height = lineWidth
+				backgroundView?.layoutParams?.height = lineWidth.roundToInt()
 				progressPrimaryView?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
 				progressSecondaryView?.layoutParams?.height = (lineWidth-(secondaryMargin*2)).toInt()
 			}
@@ -286,14 +335,30 @@ class InkSeekbar: FrameLayout {
 				TOP_DOWN, DOWN_TOP -> {
 					val newPrimary = ((it.height-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.height-(secondaryMargin*2)) * secondaryPercentage).toInt()
-					if (progressPrimaryView?.layoutParams?.height != newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
-					if (progressSecondaryView?.layoutParams?.height != newPrimary) progressSecondaryView?.layoutParams?.height = newSecondary
+					if (progressPrimaryView?.layoutParams?.height!=newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
+					if (progressSecondaryView?.layoutParams?.height!=newPrimary) progressSecondaryView?.layoutParams?.height = newSecondary
+					(newPrimary -(markerHeight.roundToInt()/2)).let { margin ->
+						if(mode==Mode.SEEKBAR) Log.d("INLAKOU", "margin: $margin")
+						if(orientation==TOP_DOWN) {
+							markerView?.setMargins(top = margin)
+						}else{
+							markerView?.setMargins(bottom = margin)
+						}
+					}
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
 					val newPrimary = ((it.width-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.width-(secondaryMargin*2)) * secondaryPercentage).toInt()
-					if (progressPrimaryView?.layoutParams?.width != newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
-					if (progressSecondaryView?.layoutParams?.width != newPrimary) progressSecondaryView?.layoutParams?.width = newSecondary
+					if (progressPrimaryView?.layoutParams?.width!=newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
+					if (progressSecondaryView?.layoutParams?.width!=newPrimary) progressSecondaryView?.layoutParams?.width = newSecondary
+					(newPrimary-(markerHeight.roundToInt()/2)).let { margin ->
+						if(mode==Mode.SEEKBAR) Log.d("INLAKOU", "margin: $margin")
+						if(orientation==LEFT_RIGHT) {
+							markerView?.setMargins(left = margin)
+						}else{
+							markerView?.setMargins(right = margin)
+						}
+					}
 				}
 			}
 			when(orientation){
@@ -323,7 +388,8 @@ class InkSeekbar: FrameLayout {
 		updateColors(backgroundView, backgroundOrientation, backgroundColors, backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(progressPrimaryView, primaryOrientation, primaryColors, primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(progressSecondaryView, secondaryOrientation, secondaryColors, secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
-		updateColors(marker, markerOrientation, markerColors, markerCornerRadii)
+		Log.d("updateColors", "markerOrientation: $markerOrientation | markerColors: $markerColors | markerCornerRadii: $markerCornerRadii")
+		updateColors(markerView, markerOrientation, markerColors, markerCornerRadii ?: generalCornerRadii ?: mutableListOf())
 	}
 	
 	private fun updateColors(view: View?, orientation: GradientDrawable.Orientation, colorList: List<Int>, customCornerRadii: List<Float>) {
