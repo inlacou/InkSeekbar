@@ -432,19 +432,19 @@ class InkSeekbar: FrameLayout {
 			when(orientation){
 				TOP_DOWN -> {
 					progressPrimaryView?.setMargins(top = (primaryMargin+secondaryMargin+generalVerticalMargin).toInt())
-					progressSecondaryView?.setMargins(top = (secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(top = (secondaryMargin+generalVerticalMargin).toInt())
 				}
 				DOWN_TOP -> {
 					progressPrimaryView?.setMargins(bottom = (primaryMargin+secondaryMargin+generalVerticalMargin).toInt())
-					progressSecondaryView?.setMargins(bottom = (secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(bottom = (secondaryMargin+generalVerticalMargin).toInt())
 				}
 				LEFT_RIGHT -> {
 					progressPrimaryView?.setMargins(left = (primaryMargin+secondaryMargin+generalHorizontalMargin).toInt())
-					progressSecondaryView?.setMargins(left = (secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(left = (secondaryMargin+generalHorizontalMargin).toInt())
 				}
 				RIGHT_LEFT -> {
 					progressPrimaryView?.setMargins(right = (primaryMargin+secondaryMargin+generalHorizontalMargin).toInt())
-					progressSecondaryView?.setMargins(right = (secondaryMargin).toInt())
+					progressSecondaryView?.setMargins(right = (secondaryMargin+generalHorizontalMargin).toInt())
 				}
 			}
 			backgroundView?.setMargins(top = generalVerticalMargin.toInt(), bottom = generalVerticalMargin.toInt(), left = generalHorizontalMargin.toInt(), right = generalHorizontalMargin.toInt())

@@ -56,6 +56,10 @@ class MainActivity : AppCompatActivity() {
 				it.setPrimaryProgress(it.primaryProgress+1, false)
 				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
+			inkseekbar_left_right?.let {
+				it.setPrimaryProgress(it.primaryProgress+1, false)
+				it.setSecondaryProgress(it.secondaryProgress+2, false)
+			}
 		},{
 			Log.d("MainActObs", "${it.message}")
 		})
