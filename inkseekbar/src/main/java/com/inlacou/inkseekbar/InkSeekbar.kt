@@ -39,29 +39,52 @@ class InkSeekbar: FrameLayout {
 			updateDimensions()
 		}
 	
-	fun setPrimaryProgress(value: Int, fireListener: Boolean) {
+	fun setPrimaryProgress(value: Int, fromUser: Boolean) {
 		if(value>maxProgress){
 			primaryProgress = maxProgress
 		}
 		else {
 			primaryProgress = value
-			if(fireListener) onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+			if(fromUser) onValueChangeListener?.invoke(value, secondaryProgress)
+			onValuePrimaryChangeListener?.invoke(value, fromUser)
+			onValuePrimarySetListener?.invoke(value, fromUser)
 		}
 		updateDimensions()
 	}
 	
-	fun setSecondaryProgress(value: Int, fireListener: Boolean) {
+	fun setSecondaryProgress(value: Int, fromUser: Boolean) {
 		if(value>maxProgress){
 			secondaryProgress = maxProgress
 		}
 		else {
 			secondaryProgress = value
-			if(fireListener) onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+			if(fromUser) onValueChangeListener?.invoke(primaryProgress, value)
+			onValueSecondaryChangeListener?.invoke(value, fromUser)
+			onValueSecondarySetListener?.invoke(value, fromUser)
 		}
 		updateDimensions()
 	}
 	
+	/**
+	 * Fired on any value change, primary or secondary. But only if fired by user (or fromUser==true), either for primary or for secondary value change.
+	 */
 	var onValueChangeListener: ((primary: Int, secondary: Int) -> Unit)? = null
+	/**
+	 * Fired on any primary value change.
+	 */
+	var onValuePrimaryChangeListener: ((primary: Int, fromUser: Boolean) -> Unit)? = null
+	/**
+	 * Fired on any primary value change.
+	 */
+	var onValueSecondaryChangeListener: ((secondary: Int, fromUser: Boolean) -> Unit)? = null
+	/**
+	 * Fired when user releases touch or when progress is set programmatically
+	 */
+	var onValuePrimarySetListener: ((primary: Int, fromUser: Boolean) -> Unit)? = null
+	/**
+	 * Fired when progress is set programmatically
+	 */
+	var onValueSecondarySetListener: ((secondary: Int, fromUser: Boolean) -> Unit)? = null
 	
 	var primaryProgress = 0
 		private set
@@ -303,6 +326,7 @@ class InkSeekbar: FrameLayout {
 			//val newPosition = (fixedRelativePosition/stepSize).roundToInt()
 			if(primaryProgress!=newPosition) {
 				onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+				onValuePrimaryChangeListener?.invoke(primaryProgress, true)
 			}
 			setPrimaryProgress(newPosition, true)
 			
@@ -313,6 +337,7 @@ class InkSeekbar: FrameLayout {
 				}
 				MotionEvent.ACTION_CANCEL -> false
 				MotionEvent.ACTION_UP -> {
+					onValuePrimarySetListener?.invoke(primaryProgress, true)
 					//TODO fire listener release (user interaction true)
 					false
 				}
