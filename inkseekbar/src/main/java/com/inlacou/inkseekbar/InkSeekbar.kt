@@ -497,6 +497,7 @@ class InkSeekbar: FrameLayout {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
 				layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
+				layoutParams.removeRule(RelativeLayout.CENTER_VERTICAL)
 			}
 		}
 	}
@@ -504,6 +505,7 @@ class InkSeekbar: FrameLayout {
 	private fun centerVertical(view: View?){
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.removeRule(RelativeLayout.CENTER_HORIZONTAL)
 				layoutParams.addRule(RelativeLayout.CENTER_VERTICAL)
 			}
 		}
@@ -513,6 +515,9 @@ class InkSeekbar: FrameLayout {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
 			}
 		}
 	}
@@ -520,6 +525,9 @@ class InkSeekbar: FrameLayout {
 	private fun alignParentBottom(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
 			}
 		}
@@ -528,7 +536,10 @@ class InkSeekbar: FrameLayout {
 	private fun alignParentLeft(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
 			}
 		}
 	}
@@ -536,7 +547,10 @@ class InkSeekbar: FrameLayout {
 	private fun alignParentRight(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT)
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
 			}
 		}
 	}
@@ -560,5 +574,5 @@ enum class Orientation {
 	TOP_DOWN,
 	DOWN_TOP,
 	LEFT_RIGHT,
-	/** Not working */ RIGHT_LEFT
+	RIGHT_LEFT
 }
