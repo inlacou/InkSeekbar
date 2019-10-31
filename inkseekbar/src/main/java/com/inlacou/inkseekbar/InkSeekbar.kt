@@ -224,8 +224,8 @@ class InkSeekbar: FrameLayout {
 					}
 				}
 			}
-			if (ta.hasValue(R.styleable.InkSeekbar_markerColor)) {
-				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_markerColor, -1)).toList().let {
+			if (ta.hasValue(R.styleable.InkSeekbar_markerColors)) {
+				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_markerColors, -1)).toList().let {
 					if(it.isNotEmpty()) {
 						markerColors.clear()
 						it.forEach { markerColors.add(it) }
