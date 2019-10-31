@@ -13,16 +13,18 @@
 		android:orientation="horizontal">
 		<com.inlacou.inkseekbar.InkSeekbar
 			android:id="@+id/inkseekbar_top_down"
-			android:layout_width="wrap_content"
+			android:layout_width="0dp"
 			android:layout_height="200dp"
+			android:layout_weight="1"
 			android:layout_marginStart="10dp"
 			android:layout_marginLeft="10dp"
 			app:corners="16dp"
 			app:orientation="TOP_DOWN" />
 		<com.inlacou.inkseekbar.InkSeekbar
 			android:id="@+id/inkseekbar_down_top"
-			android:layout_width="wrap_content"
+			android:layout_width="0dp"
 			android:layout_height="200dp"
+			android:layout_weight="1"
 			android:layout_marginStart="10dp"
 			android:layout_marginLeft="10dp"
 			app:backgroundColor="@color/basic_grey"
