@@ -57,15 +57,14 @@ class MainActivity : AppCompatActivity() {
 				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
 			inkseekbar_left_right?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
 				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
 		},{
 			Log.d("MainActObs", "${it.message}")
 		})
 		
-		inkseekbar_left_right?.onValueChangeListener = { primary, secondary ->
-			Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
+		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
+			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
 		}
 	}
 	

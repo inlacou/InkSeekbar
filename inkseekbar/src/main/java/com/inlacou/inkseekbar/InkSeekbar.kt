@@ -40,9 +40,8 @@ class InkSeekbar: FrameLayout {
 		}
 	
 	fun setPrimaryProgress(value: Int, fromUser: Boolean) {
-		if(value>maxProgress){
+		if(value>maxProgress)
 			primaryProgress = maxProgress
-		}
 		else {
 			primaryProgress = value
 			if(fromUser) onValueChangeListener?.invoke(value, secondaryProgress)
@@ -320,7 +319,6 @@ class InkSeekbar: FrameLayout {
 			var fixedRelativePosition = relativePosition-(primaryMargin+secondaryMargin) //Fix touch
 			if(fixedRelativePosition<0) fixedRelativePosition = 0f
 			if(fixedRelativePosition>totalPrimarySize) fixedRelativePosition = totalPrimarySize
-			Log.d("INLAKOU", "fixedRelativePosition: $fixedRelativePosition")
 			//val roughStep = if(reversed) (fixedRelativePosition/stepSize)-1 else (fixedRelativePosition/stepSize)
 			val newPosition = if(orientation==DOWN_TOP || orientation==RIGHT_LEFT) (totalSteps-(fixedRelativePosition/stepSize)).roundToInt() else (fixedRelativePosition/stepSize).roundToInt()
 			//val newPosition = (fixedRelativePosition/stepSize).roundToInt()
@@ -328,7 +326,10 @@ class InkSeekbar: FrameLayout {
 				onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
 				onValuePrimaryChangeListener?.invoke(primaryProgress, true)
 			}
-			setPrimaryProgress(newPosition, true)
+			primaryProgress = newPosition
+			onValueChangeListener?.invoke(newPosition, secondaryProgress)
+			onValuePrimaryChangeListener?.invoke(newPosition, true)
+			updateDimensions()
 			
 			when(event.action){
 				MotionEvent.ACTION_DOWN -> {
@@ -497,7 +498,7 @@ class InkSeekbar: FrameLayout {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
 				layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
-				layoutParams.removeRule(RelativeLayout.CENTER_VERTICAL)
+				layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, 0)
 			}
 		}
 	}
@@ -505,7 +506,7 @@ class InkSeekbar: FrameLayout {
 	private fun centerVertical(view: View?){
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
-				layoutParams.removeRule(RelativeLayout.CENTER_HORIZONTAL)
+				layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL, 0)
 				layoutParams.addRule(RelativeLayout.CENTER_VERTICAL)
 			}
 		}
@@ -515,9 +516,9 @@ class InkSeekbar: FrameLayout {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0)
 			}
 		}
 	}
@@ -525,9 +526,9 @@ class InkSeekbar: FrameLayout {
 	private fun alignParentBottom(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0)
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
 			}
 		}
@@ -536,10 +537,10 @@ class InkSeekbar: FrameLayout {
 	private fun alignParentLeft(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0)
 			}
 		}
 	}
@@ -547,10 +548,10 @@ class InkSeekbar: FrameLayout {
 	private fun alignParentRight(view: View?) {
 		view?.layoutParams?.let { layoutParams ->
 			if(layoutParams is RelativeLayout.LayoutParams){
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_TOP)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_LEFT)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0)
 				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT)
-				layoutParams.removeRule(RelativeLayout.ALIGN_PARENT_BOTTOM)
+				layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, 0)
 			}
 		}
 	}
