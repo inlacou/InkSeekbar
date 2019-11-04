@@ -2,7 +2,9 @@ package com.inlacou.inkseekbar
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -18,6 +20,7 @@ class InkSeekbar: FrameLayout {
 	constructor(context: Context, attrSet: AttributeSet) : super(context, attrSet) { readAttrs(attrSet) }
 	constructor(context: Context, attrSet: AttributeSet, arg: Int) : super(context, attrSet, arg) { readAttrs(attrSet) }
 	
+	private var clickableView: View? = null
 	private var backgroundView: View? = null
 	private var progressPrimaryView: View? = null
 	private var progressSecondaryView: View? = null
@@ -48,13 +51,12 @@ class InkSeekbar: FrameLayout {
 			onValuePrimaryChangeListener?.invoke(value, fromUser)
 			onValuePrimarySetListener?.invoke(value, fromUser)
 		}
-		updateDimensions()
+		//updateDimensions()
 	}
 	
 	fun setSecondaryProgress(value: Int, fromUser: Boolean) {
-		if(value>maxProgress){
+		if(value>maxProgress)
 			secondaryProgress = maxProgress
-		}
 		else {
 			secondaryProgress = value
 			if(fromUser) onValueChangeListener?.invoke(primaryProgress, value)
@@ -294,6 +296,7 @@ class InkSeekbar: FrameLayout {
 	
 	init {
 		val rootView = View.inflate(context, R.layout.ink_seekbar, this)
+		clickableView = rootView.findViewById(R.id.clickable)
 		backgroundView = rootView.findViewById(R.id.background)
 		progressPrimaryView = rootView.findViewById(R.id.progress_primary)
 		progressSecondaryView = rootView.findViewById(R.id.progress_secondary)
@@ -309,14 +312,14 @@ class InkSeekbar: FrameLayout {
 	
 	@SuppressLint("ClickableViewAccessibility")
 	private fun setListeners() {
-		backgroundView?.setOnTouchListener { _, event ->
+		clickableView?.setOnTouchListener { _, event ->
 			if(mode==Mode.PROGRESS) return@setOnTouchListener false
 			
 			val relativePosition = when(orientation) {
 				TOP_DOWN, DOWN_TOP -> event.y
 				LEFT_RIGHT, RIGHT_LEFT -> event.x
 			} //reaches 0 at top and goes on the minus realm if you keep going up
-			var fixedRelativePosition = relativePosition-(primaryMargin+secondaryMargin) //Fix touch
+			var fixedRelativePosition = relativePosition-(primaryMargin+secondaryMargin+generalHorizontalMargin) //Fix touch
 			if(fixedRelativePosition<0) fixedRelativePosition = 0f
 			if(fixedRelativePosition>totalPrimarySize) fixedRelativePosition = totalPrimarySize
 			//val roughStep = if(reversed) (fixedRelativePosition/stepSize)-1 else (fixedRelativePosition/stepSize)
@@ -351,6 +354,7 @@ class InkSeekbar: FrameLayout {
 	private fun updateDimensions() {
 		when(orientation) {
 			TOP_DOWN, DOWN_TOP -> {
+				centerHorizontal(clickableView)
 				centerHorizontal(backgroundView)
 				centerHorizontal(progressPrimaryView)
 				centerHorizontal(progressSecondaryView)
@@ -366,12 +370,15 @@ class InkSeekbar: FrameLayout {
 				}
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
+				clickableView?.layoutParams?.width  = lineWidth.roundToInt()
+				clickableView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.width  = lineWidth.roundToInt()
 				backgroundView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				progressPrimaryView?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
 				progressSecondaryView?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
 			}
 			LEFT_RIGHT, RIGHT_LEFT -> {
+				centerVertical(clickableView)
 				centerVertical(backgroundView)
 				centerVertical(progressPrimaryView)
 				centerVertical(progressSecondaryView)
@@ -387,6 +394,8 @@ class InkSeekbar: FrameLayout {
 				}
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
+				clickableView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
+				clickableView?.layoutParams?.height = lineWidth.roundToInt()
 				backgroundView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.height = lineWidth.roundToInt()
 				progressPrimaryView?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
@@ -397,16 +406,15 @@ class InkSeekbar: FrameLayout {
 	}
 	
 	private fun updateDimensions2(){
-		backgroundView?.let {
+		clickableView?.let {
 			when (orientation) {
 				TOP_DOWN, DOWN_TOP -> {
-					val newPrimary = ((it.height-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
-					val newSecondary = ((it.height-(secondaryMargin*2)) * secondaryPercentage).toInt()
+					val newPrimary = ((it.height-((primaryMargin+secondaryMargin+generalVerticalMargin)*2)) * primaryPercentage).toInt()
+					val newSecondary = ((it.height-((secondaryMargin+generalVerticalMargin)*2)) * secondaryPercentage).toInt()
 					if (progressPrimaryView?.layoutParams?.height!=newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
-					if (progressSecondaryView?.layoutParams?.height!=newPrimary) progressSecondaryView?.layoutParams?.height = newSecondary
+					if (progressSecondaryView?.layoutParams?.height!=newSecondary) progressSecondaryView?.layoutParams?.height = newSecondary
 					(newPrimary).let {
 						val margin = if(it>0) it else 0
-						if(mode==Mode.SEEKBAR) Log.d("INLAKOU", "margin: $margin")
 						if(orientation==TOP_DOWN) {
 							markerView?.setMargins(top = margin)
 						}else{
@@ -415,13 +423,12 @@ class InkSeekbar: FrameLayout {
 					}
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
-					val newPrimary = ((it.width-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
-					val newSecondary = ((it.width-(secondaryMargin*2)) * secondaryPercentage).toInt()
+					val newPrimary = ((it.width-((primaryMargin+secondaryMargin+generalHorizontalMargin)*2)) * primaryPercentage).toInt()
+					val newSecondary = ((it.width-((secondaryMargin+generalHorizontalMargin)*2)) * secondaryPercentage).toInt()
 					if (progressPrimaryView?.layoutParams?.width!=newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
-					if (progressSecondaryView?.layoutParams?.width!=newPrimary) progressSecondaryView?.layoutParams?.width = newSecondary
+					if (progressSecondaryView?.layoutParams?.width!=newSecondary) progressSecondaryView?.layoutParams?.width = newSecondary
 					(newPrimary).let {
 						val margin = if(it>0) it else 0
-						if(mode==Mode.SEEKBAR) Log.d("INLAKOU", "margin: $margin")
 						if(orientation==LEFT_RIGHT) {
 							markerView?.setMargins(left = margin)
 						}else{
@@ -448,6 +455,8 @@ class InkSeekbar: FrameLayout {
 					progressSecondaryView?.setMargins(right = (secondaryMargin+generalHorizontalMargin).toInt())
 				}
 			}
+			//clickableView?.setMargins(top = generalVerticalMargin.toInt(), bottom = generalVerticalMargin.toInt(), left = generalHorizontalMargin.toInt(), right = generalHorizontalMargin.toInt())
+			clickableView?.requestLayout()
 			backgroundView?.setMargins(top = generalVerticalMargin.toInt(), bottom = generalVerticalMargin.toInt(), left = generalHorizontalMargin.toInt(), right = generalHorizontalMargin.toInt())
 			backgroundView?.requestLayout()
 			progressPrimaryView?.requestLayout()
@@ -459,7 +468,6 @@ class InkSeekbar: FrameLayout {
 		updateColors(backgroundView, backgroundOrientation, backgroundColors, backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(progressPrimaryView, primaryOrientation, primaryColors, primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(progressSecondaryView, secondaryOrientation, secondaryColors, secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
-		Log.d("updateColors", "markerOrientation: $markerOrientation | markerColors: $markerColors | markerCornerRadii: $markerCornerRadii")
 		updateColors(markerView, markerOrientation, markerColors, markerCornerRadii ?: generalCornerRadii ?: mutableListOf())
 	}
 	
@@ -469,7 +477,7 @@ class InkSeekbar: FrameLayout {
 		view?.apply {
 			when {
 				colors.size > 1 -> {
-					this.background = GradientDrawable(orientation, colors.toIntArray()).apply {
+					this.setBackgroundCompat(GradientDrawable(orientation, colors.toIntArray()).apply {
 						this.cornerRadii = when {
 							customCornerRadii.size == 1 -> floatArrayOf(
 									customCornerRadii[0], customCornerRadii[0], customCornerRadii[0], customCornerRadii[0],
@@ -482,7 +490,7 @@ class InkSeekbar: FrameLayout {
 									customCornerRadii[4], customCornerRadii[5], customCornerRadii[6], customCornerRadii[7])
 							else -> floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f)
 						}
-					}
+					})
 				}
 				colors.size == 1 -> {
 					this.setBackgroundColor(colors.size)
@@ -491,6 +499,14 @@ class InkSeekbar: FrameLayout {
 					//TODO
 				}
 			}
+		}
+	}
+	
+	private fun View.setBackgroundCompat(drawable: Drawable){
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+			this.background = drawable
+		}else{
+			this.setBackgroundDrawable(drawable)
 		}
 	}
 	
