@@ -51,13 +51,12 @@ class InkSeekbar: FrameLayout {
 			onValuePrimaryChangeListener?.invoke(value, fromUser)
 			onValuePrimarySetListener?.invoke(value, fromUser)
 		}
-		updateDimensions()
+		//updateDimensions()
 	}
 	
 	fun setSecondaryProgress(value: Int, fromUser: Boolean) {
-		if(value>maxProgress){
+		if(value>maxProgress)
 			secondaryProgress = maxProgress
-		}
 		else {
 			secondaryProgress = value
 			if(fromUser) onValueChangeListener?.invoke(primaryProgress, value)
@@ -413,10 +412,9 @@ class InkSeekbar: FrameLayout {
 					val newPrimary = ((it.height-((primaryMargin+secondaryMargin+generalVerticalMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.height-((secondaryMargin+generalVerticalMargin)*2)) * secondaryPercentage).toInt()
 					if (progressPrimaryView?.layoutParams?.height!=newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
-					if (progressSecondaryView?.layoutParams?.height!=newPrimary) progressSecondaryView?.layoutParams?.height = newSecondary
+					if (progressSecondaryView?.layoutParams?.height!=newSecondary) progressSecondaryView?.layoutParams?.height = newSecondary
 					(newPrimary).let {
 						val margin = if(it>0) it else 0
-						if(mode==Mode.SEEKBAR) Log.d("INLAKOU", "margin: $margin")
 						if(orientation==TOP_DOWN) {
 							markerView?.setMargins(top = margin)
 						}else{
@@ -428,10 +426,9 @@ class InkSeekbar: FrameLayout {
 					val newPrimary = ((it.width-((primaryMargin+secondaryMargin+generalHorizontalMargin)*2)) * primaryPercentage).toInt()
 					val newSecondary = ((it.width-((secondaryMargin+generalHorizontalMargin)*2)) * secondaryPercentage).toInt()
 					if (progressPrimaryView?.layoutParams?.width!=newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
-					if (progressSecondaryView?.layoutParams?.width!=newPrimary) progressSecondaryView?.layoutParams?.width = newSecondary
+					if (progressSecondaryView?.layoutParams?.width!=newSecondary) progressSecondaryView?.layoutParams?.width = newSecondary
 					(newPrimary).let {
 						val margin = if(it>0) it else 0
-						if(mode==Mode.SEEKBAR) Log.d("INLAKOU", "margin: $margin")
 						if(orientation==LEFT_RIGHT) {
 							markerView?.setMargins(left = margin)
 						}else{
