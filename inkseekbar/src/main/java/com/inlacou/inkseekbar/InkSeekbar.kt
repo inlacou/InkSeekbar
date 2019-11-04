@@ -410,8 +410,8 @@ class InkSeekbar: FrameLayout {
 		clickableView?.let {
 			when (orientation) {
 				TOP_DOWN, DOWN_TOP -> {
-					val newPrimary = ((it.height-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
-					val newSecondary = ((it.height-(secondaryMargin*2)) * secondaryPercentage).toInt()
+					val newPrimary = ((it.height-((primaryMargin+secondaryMargin+generalVerticalMargin)*2)) * primaryPercentage).toInt()
+					val newSecondary = ((it.height-((secondaryMargin+generalVerticalMargin)*2)) * secondaryPercentage).toInt()
 					if (progressPrimaryView?.layoutParams?.height!=newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
 					if (progressSecondaryView?.layoutParams?.height!=newPrimary) progressSecondaryView?.layoutParams?.height = newSecondary
 					(newPrimary).let {
@@ -425,8 +425,8 @@ class InkSeekbar: FrameLayout {
 					}
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
-					val newPrimary = ((it.width-((primaryMargin+secondaryMargin)*2)) * primaryPercentage).toInt()
-					val newSecondary = ((it.width-(secondaryMargin*2)) * secondaryPercentage).toInt()
+					val newPrimary = ((it.width-((primaryMargin+secondaryMargin+generalHorizontalMargin)*2)) * primaryPercentage).toInt()
+					val newSecondary = ((it.width-((secondaryMargin+generalHorizontalMargin)*2)) * secondaryPercentage).toInt()
 					if (progressPrimaryView?.layoutParams?.width!=newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
 					if (progressSecondaryView?.layoutParams?.width!=newPrimary) progressSecondaryView?.layoutParams?.width = newSecondary
 					(newPrimary).let {
@@ -471,7 +471,6 @@ class InkSeekbar: FrameLayout {
 		updateColors(backgroundView, backgroundOrientation, backgroundColors, backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(progressPrimaryView, primaryOrientation, primaryColors, primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateColors(progressSecondaryView, secondaryOrientation, secondaryColors, secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
-		Log.d("updateColors", "markerOrientation: $markerOrientation | markerColors: $markerColors | markerCornerRadii: $markerCornerRadii")
 		updateColors(markerView, markerOrientation, markerColors, markerCornerRadii ?: generalCornerRadii ?: mutableListOf())
 	}
 	
