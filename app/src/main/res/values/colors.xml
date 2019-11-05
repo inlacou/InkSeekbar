@@ -22,11 +22,11 @@
 	<color name="none">#0000</color>
 
 	<integer-array name="blue_gradient">
-		<item>@color/basic_cyan</item>
 		<item>@color/basic_blue</item>
+		<item>@color/basic_cyan</item>
 	</integer-array>
 	<integer-array name="blue_gradient_reverse">
-		<item>@color/basic_blue</item>
 		<item>@color/basic_cyan</item>
+		<item>@color/basic_blue</item>
 	</integer-array>
 </resources>

@@ -5,11 +5,8 @@ import android.content.res.Resources
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.text.method.TextKeyListener.clear
 import android.util.Log
 import android.widget.Toast
-import com.inlacou.inkseekbar.InkSeekbar
-import com.inlacou.inkseekbar.Orientation
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -37,7 +34,7 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_top_down?.generalCornerRadii = listOf(32f)
 		inkseekbar_top_down?.primaryMargin = 10f
 		inkseekbar_top_down?.secondaryMargin = 15f
-		inkseekbar_top_down?.updateColors()
+		inkseekbar_top_down?.updateBackground()
 		val maxProgress = 100
 		inkseekbar_top_down?.maxProgress = maxProgress
 		inkseekbar_down_top?.maxProgress = maxProgress
@@ -54,9 +51,6 @@ class MainActivity : AppCompatActivity() {
 			}
 			inkseekbar_right_left?.let {
 				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
-			}
-			inkseekbar_left_right?.let {
 				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
 		},{

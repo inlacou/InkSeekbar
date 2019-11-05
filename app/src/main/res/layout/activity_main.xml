@@ -46,7 +46,8 @@
 		app:backgroundColor="@color/basic_grey"
 		app:primaryColor="@color/colorPrimary"
 		app:secondaryColor="@color/colorPrimaryDark"
-		app:primaryColors="@array/blue_gradient_reverse"
+		app:primaryColors="@array/blue_gradient"
+		app:orientation="LEFT_RIGHT"
 		app:primaryGradientOrientation="LEFT_RIGHT"
 		app:markerColor="@color/basic_red"
 		app:markerHeight="50dp"
@@ -55,9 +56,9 @@
 		app:mode="SEEKBAR"
 		app:corners="16dp"
 		app:secondaryMargin="4dp"
-		app:orientation="LEFT_RIGHT"
 		android:layout_marginTop="10dp"
-		tools:maxProgress="100"
+		app:maxProgress="100"
+		app:secondaryProgress="100"
 		tools:primaryProgress="50"
 		/>
 	<com.inlacou.inkseekbar.InkSeekbar
