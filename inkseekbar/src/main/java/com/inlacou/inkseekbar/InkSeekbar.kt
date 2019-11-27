@@ -379,7 +379,7 @@ class InkSeekbar: FrameLayout {
 	}
 	
 	//TODO durations here are a bit odd
-	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
+	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, delay: Long = 0) {
 		if(value>maxProgress)
 			primaryProgress = maxProgress
 		else {
@@ -388,11 +388,11 @@ class InkSeekbar: FrameLayout {
 			onValuePrimaryChangeListener?.invoke(value, fromUser)
 			onValuePrimarySetListener?.invoke(value, fromUser)
 		}
-		startUpdate(animate, duration)
+		startUpdate(animate, durationPrimary = duration, primaryDelay = delay)
 	}
 	
 	//TODO durations here are a bit odd
-	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, durationSecondary: Long = DEFAULT_ANIMATION_DURATION) {
+	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, delay: Long = 0) {
 		if(value>maxProgress)
 			secondaryProgress = maxProgress
 		else {
@@ -401,10 +401,10 @@ class InkSeekbar: FrameLayout {
 			onValueSecondaryChangeListener?.invoke(value, fromUser)
 			onValueSecondarySetListener?.invoke(value, fromUser)
 		}
-		startUpdate(animate, durationSecondary = durationSecondary)
+		startUpdate(animate, durationSecondary = duration, secondaryDelay = delay)
 	}
 	
-	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = duration) {
+	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = duration, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
 		if(primary>maxProgress) primaryProgress = maxProgress
 		if(secondary>maxProgress) secondaryProgress = maxProgress
 		if(primary<=maxProgress && secondary<=maxProgress) {
@@ -418,12 +418,12 @@ class InkSeekbar: FrameLayout {
 			onValueSecondaryChangeListener?.invoke(secondary, fromUser)
 			onValueSecondarySetListener?.invoke(secondary, fromUser)
 		}
-		startUpdate(animate, duration, durationSecondary)
+		startUpdate(animate, durationPrimary = duration, durationSecondary = durationSecondary, primaryDelay = primaryDelay, secondaryDelay = secondaryDelay)
 	}
 	
-	private fun startUpdate(animate: Boolean = false, durationPrimary: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = DEFAULT_ANIMATION_DURATION) {
+	private fun startUpdate(animate: Boolean = false, durationPrimary: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = DEFAULT_ANIMATION_DURATION, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
 		if(animate){
-			tryUpdateAnimated(durationPrimary, durationSecondary)
+			tryUpdateAnimated(durationPrimary, durationSecondary, primaryDelay, secondaryDelay)
 		}else{
 			makeUpdate()
 		}
@@ -435,7 +435,7 @@ class InkSeekbar: FrameLayout {
 		update()
 	}
 	
-	private fun tryUpdateAnimated(durationPrimary: Long, durationSecondary: Long, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
+	private fun tryUpdateAnimated(durationPrimary: Long, durationSecondary: Long, primaryDelay: Long, secondaryDelay: Long) {
 		try {
 			disposable?.dispose()
 			disposable = Observable.interval(10L, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe({
