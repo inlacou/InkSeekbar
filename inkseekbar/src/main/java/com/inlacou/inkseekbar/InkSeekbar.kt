@@ -11,6 +11,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.inlacou.animations.CubicBezier
+import com.inlacou.animations.Interpolable
 import com.inlacou.animations.easetypes.EaseType
 import com.inlacou.inkseekbar.Orientation.*
 import io.reactivex.Observable
@@ -32,7 +34,14 @@ class InkSeekbar: FrameLayout {
 	private var progressSecondaryView: View? = null
 	private var markerView: View? = null
 	
-	var easeType: EaseType = EaseType.EaseOutBounce
+	/**
+	 * You can create your own Interpolable or use one of my own.
+	 * My own:
+	 * EaseType.EaseOutBounce.newInstance()
+	 * or
+	 * EaseType.EaseOutCubic.newInstance()
+	 */
+	var easeType: Interpolable = EaseType.EaseOutBounce.newInstance()
 	
 	var lineWidth = 100f
 		set(value) {
@@ -397,19 +406,34 @@ class InkSeekbar: FrameLayout {
 	}
 	
 	private fun startUpdate(animate: Boolean = false, duration: Long = 2_000L) {
-		if(!animate){
-			primaryProgressVisual = primaryProgress.toFloat()
-			secondaryProgressVisual = secondaryProgress.toFloat()
-			update()
+		if(animate){
+			tryUpdateAnimated(duration)
 		}else{
+			makeUpdate()
+		}
+	}
+	
+	private fun makeUpdate() {
+		primaryProgressVisual = primaryProgress.toFloat()
+		secondaryProgressVisual = secondaryProgress.toFloat()
+		update()
+	}
+	
+	private fun tryUpdateAnimated(duration: Long) {
+		try {
 			disposable?.dispose()
 			disposable = Observable.interval(10L, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-				if(it*10L==duration) disposable?.dispose()
-				val steps = duration/10L
-				primaryProgressVisual = primaryProgress*easeType.getOffset(it.toFloat()/steps)
-				secondaryProgressVisual = secondaryProgress*easeType.getOffset(it.toFloat()/steps)
+				if (it * 10L == duration) disposable?.dispose()
+				val steps = duration / 10L
+				primaryProgressVisual = primaryProgress * easeType.getOffset(it.toFloat() / steps)
+				secondaryProgressVisual = secondaryProgress * easeType.getOffset(it.toFloat() / steps)
 				update()
-			},{})
+			}, {})
+		}catch (e: NoClassDefFoundError){
+			//RX not present
+			//Fault back to not-animated
+			Log.w("InkSeekbar", "update-animated failed, RX library not found. Fault back to non-animated updated")
+			makeUpdate()
 		}
 	}
 	

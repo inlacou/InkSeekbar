@@ -1,22 +1,11 @@
 package com.inlacou.inkseekbar
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.app.ProgressDialog.show
 import android.graphics.drawable.Drawable
 import android.os.Build
-import android.provider.SyncStateContract.Helpers.update
-import android.util.Log
 import android.view.View
-import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.widget.RelativeLayout
-import com.inlacou.animations.InterpolatorFactory
-import com.inlacou.animations.easetypes.EaseType
 
 internal fun View.onDrawn(continuous: Boolean = false, callback: () -> Unit) {
 	viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {

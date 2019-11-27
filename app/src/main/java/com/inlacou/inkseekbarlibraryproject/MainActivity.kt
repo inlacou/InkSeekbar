@@ -4,14 +4,10 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.inlacou.animations.easetypes.EaseType
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 	
@@ -41,15 +37,7 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_down_top?.maxProgress = maxProgress
 		inkseekbar_left_right?.maxProgress = maxProgress
 		inkseekbar_right_left?.maxProgress = maxProgress
-		Observable.interval(100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
-			inkseekbar_top_down?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
-			}
-		},{
-			Log.e("MainActObs", "${it.message}")
-		})
-		inkseekbar_down_top?.easeType = EaseType.EaseOutCubic
+		inkseekbar_down_top?.easeType = EaseType.EaseOutCubic.newInstance()
 		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
 		inkseekbar_right_left?.setProgress(30, 60, fromUser = false, animate = true)
 		

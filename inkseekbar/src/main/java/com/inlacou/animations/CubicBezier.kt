@@ -1,11 +1,11 @@
-package com.inlacou.animations.easetypes
+package com.inlacou.animations
 
 import android.graphics.PointF
 
 /**
  * Created by Weiping on 2016/3/3.
  */
-abstract class CubicBezier {
+abstract class CubicBezier: Interpolable {
 
 	var start: PointF? = null
 	var end: PointF? = null
@@ -29,7 +29,7 @@ abstract class CubicBezier {
 		init(startX.toFloat(), startY.toFloat(), endX.toFloat(), endY.toFloat())
 	}
 
-	open fun getOffset(offset: Float): Float {
+	override fun getOffset(offset: Float): Float {
 		return getBezierCoordinateY(getXForTime(offset))
 	}
 
