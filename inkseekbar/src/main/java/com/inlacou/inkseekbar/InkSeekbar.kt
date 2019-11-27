@@ -13,8 +13,11 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.inlacou.animations.easetypes.EaseType
 import com.inlacou.inkseekbar.Orientation.*
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.ticker
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 class InkSeekbar: FrameLayout {
@@ -22,11 +25,14 @@ class InkSeekbar: FrameLayout {
 	constructor(context: Context, attrSet: AttributeSet) : super(context, attrSet) { readAttrs(attrSet) }
 	constructor(context: Context, attrSet: AttributeSet, arg: Int) : super(context, attrSet, arg) { readAttrs(attrSet) }
 	
+	private var disposable: Disposable? = null
 	private var clickableView: View? = null
 	private var backgroundView: View? = null
 	private var progressPrimaryView: View? = null
 	private var progressSecondaryView: View? = null
 	private var markerView: View? = null
+	
+	var easeType: EaseType = EaseType.EaseOutBounce
 	
 	var lineWidth = 100f
 		set(value) {
@@ -349,7 +355,7 @@ class InkSeekbar: FrameLayout {
 	}
 	
 	
-	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false) {
+	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
 		if(value>maxProgress)
 			primaryProgress = maxProgress
 		else {
@@ -358,10 +364,10 @@ class InkSeekbar: FrameLayout {
 			onValuePrimaryChangeListener?.invoke(value, fromUser)
 			onValuePrimarySetListener?.invoke(value, fromUser)
 		}
-		startUpdate(animate)
+		startUpdate(animate, duration)
 	}
 	
-	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false) {
+	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
 		if(value>maxProgress)
 			secondaryProgress = maxProgress
 		else {
@@ -370,10 +376,10 @@ class InkSeekbar: FrameLayout {
 			onValueSecondaryChangeListener?.invoke(value, fromUser)
 			onValueSecondarySetListener?.invoke(value, fromUser)
 		}
-		startUpdate(animate)
+		startUpdate(animate, duration)
 	}
 	
-	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false) {
+	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
 		if(primary>maxProgress) primaryProgress = maxProgress
 		if(secondary>maxProgress) secondaryProgress = maxProgress
 		if(primary<=maxProgress && secondary<=maxProgress) {
@@ -387,40 +393,23 @@ class InkSeekbar: FrameLayout {
 			onValueSecondaryChangeListener?.invoke(secondary, fromUser)
 			onValueSecondarySetListener?.invoke(secondary, fromUser)
 		}
-		startUpdate(animate)
+		startUpdate(animate, duration)
 	}
 	
-	private var blocking: Job? = null
-	private val steps = 100
-	private var currentStep = 0
-	private var easeType = EaseType.EaseOutBounce
-	
-	private fun startUpdate(animate: Boolean = false) {
+	private fun startUpdate(animate: Boolean = false, duration: Long = 2_000L) {
 		if(!animate){
 			primaryProgressVisual = primaryProgress.toFloat()
 			secondaryProgressVisual = secondaryProgress.toFloat()
 			update()
 		}else{
-			//TODO
-			blocking?.cancel()
-			currentStep = 0
-			blocking = runBlocking {
-				launch(Dispatchers.Unconfined) {
-					while (currentStep<=steps) {
-						Log.d("step", "$currentStep/$steps")
-						Log.d("step", "percentage: ${currentStep.toFloat()/steps}")
-						Log.d("step", "offset: ${easeType.getOffset(currentStep.toFloat()/steps)}")
-						primaryProgressVisual = primaryProgress*easeType.getOffset(currentStep.toFloat()/steps)
-						secondaryProgressVisual = secondaryProgress*easeType.getOffset(currentStep.toFloat()/steps)
-						Log.d("step", "primaryProgressVisual: $primaryProgressVisual")
-						Log.d("step", "secondaryProgressVisual: $secondaryProgressVisual")
-						update()
-						currentStep += 1
-						//delay(100)
-					}
-					blocking?.cancel()
-				}
-			}
+			disposable?.dispose()
+			disposable = Observable.interval(10L, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+				if(it*10L==duration) disposable?.dispose()
+				val steps = duration/10L
+				primaryProgressVisual = primaryProgress*easeType.getOffset(it.toFloat()/steps)
+				secondaryProgressVisual = secondaryProgress*easeType.getOffset(it.toFloat()/steps)
+				update()
+			},{})
 		}
 	}
 	
@@ -617,6 +606,10 @@ class InkSeekbar: FrameLayout {
 		parent?.requestDisallowInterceptTouchEvent(true)
 	}
 	
+	companion object {
+		const val DEFAULT_ANIMATION_DURATION = 2_000L
+	}
+	
 }
 
 private fun Orientation.toGradientOrientation(): GradientDrawable.Orientation {
@@ -639,19 +632,4 @@ enum class Orientation {
 	DOWN_TOP,
 	LEFT_RIGHT,
 	RIGHT_LEFT
-}
-
-/**
- * Visual examples here:
- * https://easings.net/en
- */
-enum class Animation {
-	LINEAR,
-	EASE_IN_SINE,
-	EASE_OUT_SINE,
-	EASE_IN_OUT_SINE,
-	EASE_IN_QUAD,
-	EASE_OUT_QUAD,
-	EASE_IN_OUT_QUAD
-	//TODO more here https://easings.net/en
 }

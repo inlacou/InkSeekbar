@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.inlacou.animations.easetypes.EaseType
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -45,16 +46,13 @@ class MainActivity : AppCompatActivity() {
 				it.setPrimaryProgress(it.primaryProgress+1, false)
 				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
-			inkseekbar_down_top?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
-			}
-			if(it==10L) {
-				inkseekbar_right_left?.setProgress(30, 60, fromUser = false, animate = true)
-			}
 		},{
 			Log.e("MainActObs", "${it.message}")
 		})
+		inkseekbar_down_top?.easeType = EaseType.EaseOutCubic
+		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
+		inkseekbar_right_left?.setProgress(30, 60, fromUser = false, animate = true)
+		
 		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
 			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
 		}
