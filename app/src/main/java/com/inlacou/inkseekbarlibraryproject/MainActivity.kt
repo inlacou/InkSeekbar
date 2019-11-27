@@ -37,9 +37,9 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_down_top?.maxProgress = maxProgress
 		inkseekbar_left_right?.maxProgress = maxProgress
 		inkseekbar_right_left?.maxProgress = maxProgress
-		inkseekbar_down_top?.easeType = EaseType.EaseOutCubic.newInstance()
+		inkseekbar_down_top?.generalEaseType = EaseType.EaseOutCubic.newInstance()
 		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
-		inkseekbar_right_left?.setProgress(30, 60, fromUser = false, animate = true)
+		inkseekbar_right_left?.setProgress(100, 100, fromUser = false, animate = true, duration = 2000, durationSecondary = 2000)
 		
 		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
 			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()

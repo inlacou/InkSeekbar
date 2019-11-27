@@ -102,7 +102,7 @@ enum class ShowType {
 	FROM_TOP_TO_BOTTOM, FROM_RIGHT_TO_LEFT, FROM_BOTTOM_TO_TOP, FROM_LEFT_TO_RIGHT, FADE_IN
 }
 
-fun View.animate(duration: Long, showType: ShowType, easeType: EaseType) {
+fun View.animate(duration: Long, showType: ShowType, generalEaseType: EaseType) {
 	//DOES NOT WORK IF VIEW IS GONE, following line does not work
 	this.visibility = INVISIBLE
 	Log.d("translationX", "" + translationX)
@@ -137,6 +137,6 @@ fun View.animate(duration: Long, showType: ShowType, easeType: EaseType) {
 			
 		}
 	})
-	animator.interpolator = InterpolatorFactory.getInterpolator(easeType)
+	animator.interpolator = InterpolatorFactory.getInterpolator(generalEaseType)
 	animator.start()
 }*/

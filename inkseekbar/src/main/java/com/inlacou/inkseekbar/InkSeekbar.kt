@@ -11,7 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.inlacou.animations.CubicBezier
 import com.inlacou.animations.Interpolable
 import com.inlacou.animations.easetypes.EaseType
 import com.inlacou.inkseekbar.Orientation.*
@@ -41,7 +40,23 @@ class InkSeekbar: FrameLayout {
 	 * or
 	 * EaseType.EaseOutCubic.newInstance()
 	 */
-	var easeType: Interpolable = EaseType.EaseOutBounce.newInstance()
+	var generalEaseType: Interpolable = EaseType.EaseOutBounce.newInstance()
+	/**
+	 * You can create your own Interpolable or use one of my own.
+	 * My own:
+	 * EaseType.EaseOutBounce.newInstance()
+	 * or
+	 * EaseType.EaseOutCubic.newInstance()
+	 */
+	var primaryEaseType: Interpolable? = null
+	/**
+	 * You can create your own Interpolable or use one of my own.
+	 * My own:
+	 * EaseType.EaseOutBounce.newInstance()
+	 * or
+	 * EaseType.EaseOutCubic.newInstance()
+	 */
+	var secondaryEaseType: Interpolable? = null
 	
 	var lineWidth = 100f
 		set(value) {
@@ -363,7 +378,7 @@ class InkSeekbar: FrameLayout {
 		}
 	}
 	
-	
+	//TODO durations here are a bit odd
 	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
 		if(value>maxProgress)
 			primaryProgress = maxProgress
@@ -376,7 +391,8 @@ class InkSeekbar: FrameLayout {
 		startUpdate(animate, duration)
 	}
 	
-	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
+	//TODO durations here are a bit odd
+	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, durationSecondary: Long = DEFAULT_ANIMATION_DURATION) {
 		if(value>maxProgress)
 			secondaryProgress = maxProgress
 		else {
@@ -385,10 +401,10 @@ class InkSeekbar: FrameLayout {
 			onValueSecondaryChangeListener?.invoke(value, fromUser)
 			onValueSecondarySetListener?.invoke(value, fromUser)
 		}
-		startUpdate(animate, duration)
+		startUpdate(animate, durationSecondary = durationSecondary)
 	}
 	
-	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION) {
+	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = duration) {
 		if(primary>maxProgress) primaryProgress = maxProgress
 		if(secondary>maxProgress) secondaryProgress = maxProgress
 		if(primary<=maxProgress && secondary<=maxProgress) {
@@ -402,12 +418,12 @@ class InkSeekbar: FrameLayout {
 			onValueSecondaryChangeListener?.invoke(secondary, fromUser)
 			onValueSecondarySetListener?.invoke(secondary, fromUser)
 		}
-		startUpdate(animate, duration)
+		startUpdate(animate, duration, durationSecondary)
 	}
 	
-	private fun startUpdate(animate: Boolean = false, duration: Long = 2_000L) {
+	private fun startUpdate(animate: Boolean = false, durationPrimary: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = DEFAULT_ANIMATION_DURATION) {
 		if(animate){
-			tryUpdateAnimated(duration)
+			tryUpdateAnimated(durationPrimary, durationSecondary)
 		}else{
 			makeUpdate()
 		}
@@ -419,14 +435,14 @@ class InkSeekbar: FrameLayout {
 		update()
 	}
 	
-	private fun tryUpdateAnimated(duration: Long) {
+	private fun tryUpdateAnimated(durationPrimary: Long, durationSecondary: Long, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
 		try {
 			disposable?.dispose()
 			disposable = Observable.interval(10L, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-				if (it * 10L == duration) disposable?.dispose()
-				val steps = duration / 10L
-				primaryProgressVisual = primaryProgress * easeType.getOffset(it.toFloat() / steps)
-				secondaryProgressVisual = secondaryProgress * easeType.getOffset(it.toFloat() / steps)
+				val currentDuration = it * 10L
+				if (currentDuration >= durationPrimary+primaryDelay && currentDuration >= durationSecondary+secondaryDelay) disposable?.dispose()
+				if(currentDuration in primaryDelay .. (primaryDelay+durationPrimary)) primaryProgressVisual = primaryProgress * (primaryEaseType ?: generalEaseType).getOffset((it-primaryDelay/10L).toFloat() / (durationPrimary / 10L))
+				if(currentDuration in secondaryDelay .. (secondaryDelay+durationSecondary)) secondaryProgressVisual = secondaryProgress * (secondaryEaseType ?: generalEaseType).getOffset((it-secondaryDelay/10L).toFloat() / (durationSecondary / 10L))
 				update()
 			}, {})
 		}catch (e: NoClassDefFoundError){
