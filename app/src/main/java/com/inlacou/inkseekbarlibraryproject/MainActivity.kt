@@ -49,12 +49,11 @@ class MainActivity : AppCompatActivity() {
 				it.setPrimaryProgress(it.primaryProgress+1, false)
 				it.setSecondaryProgress(it.secondaryProgress+2, false)
 			}
-			inkseekbar_right_left?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
+			if(it==10L) {
+				inkseekbar_right_left?.setProgress(30, 60, fromUser = false, animate = true)
 			}
 		},{
-			Log.d("MainActObs", "${it.message}")
+			Log.e("MainActObs", "${it.message}")
 		})
 		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
 			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()

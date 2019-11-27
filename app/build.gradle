@@ -37,4 +37,6 @@ dependencies {
     // explicitly depend on RxJava"s latest version for bug fixes and new features.
     implementation "io.reactivex.rxjava2:rxjava:${rxjava}"                                      //RX
     implementation "io.reactivex.rxjava2:rxkotlin:${rxkotlin}"                                  ///RX
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
 }

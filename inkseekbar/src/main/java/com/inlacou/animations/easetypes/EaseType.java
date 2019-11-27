@@ -1,9 +1,10 @@
 package com.inlacou.animations.easetypes;
 
 /**
- * Created by Weiping on 2016/3/3.
+ * Created by Weiping on 03/03/2016.
+ * Updated by Inlacou on 27/11/2019.
+ * Visual representation here: https://easings.net/en
  */
-
 public enum EaseType {
     None(NoEase.class),
 
