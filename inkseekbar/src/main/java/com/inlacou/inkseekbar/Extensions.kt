@@ -96,3 +96,47 @@ internal fun View.alignParentRight() {
 		}
 	}
 }
+
+/*
+enum class ShowType {
+	FROM_TOP_TO_BOTTOM, FROM_RIGHT_TO_LEFT, FROM_BOTTOM_TO_TOP, FROM_LEFT_TO_RIGHT, FADE_IN
+}
+
+fun View.animate(duration: Long, showType: ShowType, generalEaseType: EaseType) {
+	//DOES NOT WORK IF VIEW IS GONE, following line does not work
+	this.visibility = INVISIBLE
+	Log.d("translationX", "" + translationX)
+	Log.d("translationY", "" + translationY)
+	Log.d("height", "" + height)
+	Log.d("width", "" + width)
+	val animator = when (showType) {
+		ShowType.FROM_TOP_TO_BOTTOM -> ObjectAnimator.ofFloat(this, "translationY", translationY - height, translationY)
+		ShowType.FROM_RIGHT_TO_LEFT -> ObjectAnimator.ofFloat(this, "translationX", translationX + width, translationX)
+		ShowType.FROM_BOTTOM_TO_TOP -> ObjectAnimator.ofFloat(this, "translationY", translationY + height, translationY)
+		ShowType.FROM_LEFT_TO_RIGHT -> ObjectAnimator.ofFloat(this, "translationX", translationX - width, translationX)
+		ShowType.FADE_IN -> ObjectAnimator.ofFloat(this, "alpha", 0f, 1f)
+	}
+	when (showType) {
+		ShowType.FROM_TOP_TO_BOTTOM -> Log.d("translationY", "" + (translationY - height) + " to " + translationY)
+		ShowType.FROM_RIGHT_TO_LEFT -> Log.d("translationX", "" + (translationX + width) + " to " + translationX)
+		ShowType.FROM_BOTTOM_TO_TOP -> Log.d("translationY", "" + (translationY + height) + " to " + translationY)
+		ShowType.FROM_LEFT_TO_RIGHT -> Log.d("translationX", "" + (translationX - width) + " to " + translationX)
+		ShowType.FADE_IN -> Log.d("alpha", "" + (0f) + "to" + 1f)
+	}
+	visibility = VISIBLE
+	animator.duration = duration
+	animator.addUpdateListener { invalidate() }
+	animator.addListener(object : AnimatorListenerAdapter() {
+		override fun onAnimationStart(animation: Animator?) {
+			super.onAnimationStart(animation)
+			
+		}
+		
+		override fun onAnimationEnd(animation: Animator?) {
+			super.onAnimationEnd(animation)
+			
+		}
+	})
+	animator.interpolator = InterpolatorFactory.getInterpolator(generalEaseType)
+	animator.start()
+}*/

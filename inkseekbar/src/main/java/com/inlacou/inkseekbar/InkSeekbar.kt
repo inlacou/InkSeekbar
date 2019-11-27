@@ -11,7 +11,14 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.inlacou.animations.Interpolable
+import com.inlacou.animations.easetypes.EaseType
 import com.inlacou.inkseekbar.Orientation.*
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
 class InkSeekbar: FrameLayout {
@@ -19,51 +26,53 @@ class InkSeekbar: FrameLayout {
 	constructor(context: Context, attrSet: AttributeSet) : super(context, attrSet) { readAttrs(attrSet) }
 	constructor(context: Context, attrSet: AttributeSet, arg: Int) : super(context, attrSet, arg) { readAttrs(attrSet) }
 	
+	private var disposable: Disposable? = null
 	private var clickableView: View? = null
 	private var backgroundView: View? = null
 	private var progressPrimaryView: View? = null
 	private var progressSecondaryView: View? = null
 	private var markerView: View? = null
 	
+	/**
+	 * You can create your own Interpolable or use one of my own.
+	 * My own:
+	 * EaseType.EaseOutBounce.newInstance()
+	 * or
+	 * EaseType.EaseOutCubic.newInstance()
+	 */
+	var generalEaseType: Interpolable = EaseType.EaseOutBounce.newInstance()
+	/**
+	 * You can create your own Interpolable or use one of my own.
+	 * My own:
+	 * EaseType.EaseOutBounce.newInstance()
+	 * or
+	 * EaseType.EaseOutCubic.newInstance()
+	 */
+	var primaryEaseType: Interpolable? = null
+	/**
+	 * You can create your own Interpolable or use one of my own.
+	 * My own:
+	 * EaseType.EaseOutBounce.newInstance()
+	 * or
+	 * EaseType.EaseOutCubic.newInstance()
+	 */
+	var secondaryEaseType: Interpolable? = null
+	
 	var lineWidth = 100f
 		set(value) {
 			field = value
-			update()
+			startUpdate()
 		}
 	var markerWidth = 100f
 		set(value) {
 			field = value
-			update()
+			startUpdate()
 		}
 	var markerHeight = 100f
 		set(value) {
 			field = value
-			update()
+			startUpdate()
 		}
-	
-	fun setPrimaryProgress(value: Int, fromUser: Boolean) {
-		if(value>maxProgress)
-			primaryProgress = maxProgress
-		else {
-			primaryProgress = value
-			if(fromUser) onValueChangeListener?.invoke(value, secondaryProgress)
-			onValuePrimaryChangeListener?.invoke(value, fromUser)
-			onValuePrimarySetListener?.invoke(value, fromUser)
-		}
-		update()
-	}
-	
-	fun setSecondaryProgress(value: Int, fromUser: Boolean) {
-		if(value>maxProgress)
-			secondaryProgress = maxProgress
-		else {
-			secondaryProgress = value
-			if(fromUser) onValueChangeListener?.invoke(primaryProgress, value)
-			onValueSecondaryChangeListener?.invoke(value, fromUser)
-			onValueSecondarySetListener?.invoke(value, fromUser)
-		}
-		update()
-	}
 	
 	/**
 	 * Fired on any value change, primary or secondary. But only if fired by user (or fromUser==true), either for primary or for secondary value change.
@@ -86,6 +95,8 @@ class InkSeekbar: FrameLayout {
 	 */
 	var onValueSecondarySetListener: ((secondary: Int, fromUser: Boolean) -> Unit)? = null
 	
+	private var primaryProgressVisual = 0f
+	private var secondaryProgressVisual = 0f
 	var primaryProgress = 0
 		private set
 	var secondaryProgress = 0
@@ -93,9 +104,11 @@ class InkSeekbar: FrameLayout {
 	var maxProgress = 300
 		set(value) {
 			field = value
-			update()
+			startUpdate()
 		}
 	var orientation = LEFT_RIGHT
+	val primaryPercentageVisual get() =  primaryProgressVisual.toDouble()/maxProgress
+	val secondaryPercentageVisual get() = secondaryProgressVisual.toDouble()/maxProgress
 	val primaryPercentage get() =  primaryProgress.toDouble()/maxProgress
 	val secondaryPercentage get() = secondaryProgress.toDouble()/maxProgress
 	
@@ -289,7 +302,7 @@ class InkSeekbar: FrameLayout {
 		} finally {
 			ta.recycle()
 		}
-		update()
+		startUpdate()
 		updateBackground()
 	}
 	
@@ -346,7 +359,7 @@ class InkSeekbar: FrameLayout {
 			primaryProgress = newPosition
 			onValueChangeListener?.invoke(newPosition, secondaryProgress)
 			onValuePrimaryChangeListener?.invoke(newPosition, true)
-			update()
+			startUpdate()
 			
 			when(event.action){
 				MotionEvent.ACTION_DOWN -> {
@@ -365,7 +378,82 @@ class InkSeekbar: FrameLayout {
 		}
 	}
 	
-	fun update() {
+	//TODO durations here are a bit odd
+	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, delay: Long = 0) {
+		if(value>maxProgress)
+			primaryProgress = maxProgress
+		else {
+			primaryProgress = value
+			if(fromUser) onValueChangeListener?.invoke(value, secondaryProgress)
+			onValuePrimaryChangeListener?.invoke(value, fromUser)
+			onValuePrimarySetListener?.invoke(value, fromUser)
+		}
+		startUpdate(animate, durationPrimary = duration, primaryDelay = delay)
+	}
+	
+	//TODO durations here are a bit odd
+	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, delay: Long = 0) {
+		if(value>maxProgress)
+			secondaryProgress = maxProgress
+		else {
+			secondaryProgress = value
+			if(fromUser) onValueChangeListener?.invoke(primaryProgress, value)
+			onValueSecondaryChangeListener?.invoke(value, fromUser)
+			onValueSecondarySetListener?.invoke(value, fromUser)
+		}
+		startUpdate(animate, durationSecondary = duration, secondaryDelay = delay)
+	}
+	
+	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = duration, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
+		if(primary>maxProgress) primaryProgress = maxProgress
+		if(secondary>maxProgress) secondaryProgress = maxProgress
+		if(primary<=maxProgress && secondary<=maxProgress) {
+			primaryProgress = primary
+			secondaryProgress = secondary
+			if(fromUser) {
+				onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+			}
+			onValuePrimaryChangeListener?.invoke(primary, fromUser)
+			onValuePrimarySetListener?.invoke(primary, fromUser)
+			onValueSecondaryChangeListener?.invoke(secondary, fromUser)
+			onValueSecondarySetListener?.invoke(secondary, fromUser)
+		}
+		startUpdate(animate, durationPrimary = duration, durationSecondary = durationSecondary, primaryDelay = primaryDelay, secondaryDelay = secondaryDelay)
+	}
+	
+	private fun startUpdate(animate: Boolean = false, durationPrimary: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = DEFAULT_ANIMATION_DURATION, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
+		if(animate){
+			tryUpdateAnimated(durationPrimary, durationSecondary, primaryDelay, secondaryDelay)
+		}else{
+			makeUpdate()
+		}
+	}
+	
+	private fun makeUpdate() {
+		primaryProgressVisual = primaryProgress.toFloat()
+		secondaryProgressVisual = secondaryProgress.toFloat()
+		update()
+	}
+	
+	private fun tryUpdateAnimated(durationPrimary: Long, durationSecondary: Long, primaryDelay: Long, secondaryDelay: Long) {
+		try {
+			disposable?.dispose()
+			disposable = Observable.interval(10L, TimeUnit.MILLISECONDS).subscribeOn(Schedulers.newThread()).observeOn(AndroidSchedulers.mainThread()).subscribe({
+				val currentDuration = it * 10L
+				if (currentDuration >= durationPrimary+primaryDelay && currentDuration >= durationSecondary+secondaryDelay) disposable?.dispose()
+				if(currentDuration in primaryDelay .. (primaryDelay+durationPrimary)) primaryProgressVisual = primaryProgress * (primaryEaseType ?: generalEaseType).getOffset((it-primaryDelay/10L).toFloat() / (durationPrimary / 10L))
+				if(currentDuration in secondaryDelay .. (secondaryDelay+durationSecondary)) secondaryProgressVisual = secondaryProgress * (secondaryEaseType ?: generalEaseType).getOffset((it-secondaryDelay/10L).toFloat() / (durationSecondary / 10L))
+				update()
+			}, {})
+		}catch (e: NoClassDefFoundError){
+			//RX not present
+			//Fault back to not-animated
+			Log.w("InkSeekbar", "update-animated failed, RX library not found. Fault back to non-animated updated")
+			makeUpdate()
+		}
+	}
+	
+	private fun update() {
 		when(orientation) {
 			TOP_DOWN, DOWN_TOP -> {
 				clickableView?.centerHorizontal()
@@ -423,11 +511,11 @@ class InkSeekbar: FrameLayout {
 		clickableView?.let {
 			when (orientation) {
 				TOP_DOWN, DOWN_TOP -> {
-					val newPrimary = ((it.height-((primaryMargin+secondaryMargin+generalVerticalMargin)*2)) * primaryPercentage).toInt()
-					val newSecondary = ((it.height-((secondaryMargin+generalVerticalMargin)*2)) * secondaryPercentage).toInt()
-					if (progressPrimaryView?.layoutParams?.height!=newPrimary) progressPrimaryView?.layoutParams?.height = newPrimary
-					if (progressSecondaryView?.layoutParams?.height!=newSecondary) progressSecondaryView?.layoutParams?.height = newSecondary
-					(newPrimary).let {
+					val newPrimaryHeight = ((it.height-((primaryMargin+secondaryMargin+generalVerticalMargin)*2)) * primaryPercentageVisual).toInt()
+					val newSecondaryHeight = ((it.height-((secondaryMargin+generalVerticalMargin)*2)) * secondaryPercentageVisual).toInt()
+					if (progressPrimaryView?.layoutParams?.height!=newPrimaryHeight) progressPrimaryView?.layoutParams?.height = newPrimaryHeight
+					if (progressSecondaryView?.layoutParams?.height!=newSecondaryHeight) progressSecondaryView?.layoutParams?.height = newSecondaryHeight
+					(newPrimaryHeight).let {
 						//We use the margin to set the marker position.
 						val margin = if(it>0) it else 0
 						if(orientation==TOP_DOWN) {
@@ -438,11 +526,11 @@ class InkSeekbar: FrameLayout {
 					}
 				}
 				LEFT_RIGHT, RIGHT_LEFT -> {
-					val newPrimary = ((it.width-((primaryMargin+secondaryMargin+generalHorizontalMargin)*2)) * primaryPercentage).toInt()
-					val newSecondary = ((it.width-((secondaryMargin+generalHorizontalMargin)*2)) * secondaryPercentage).toInt()
-					if (progressPrimaryView?.layoutParams?.width!=newPrimary) progressPrimaryView?.layoutParams?.width = newPrimary
-					if (progressSecondaryView?.layoutParams?.width!=newSecondary) progressSecondaryView?.layoutParams?.width = newSecondary
-					(newPrimary).let {
+					val newPrimaryWidth = ((it.width-((primaryMargin+secondaryMargin+generalHorizontalMargin)*2)) * primaryPercentageVisual).toInt()
+					val newSecondaryWidth = ((it.width-((secondaryMargin+generalHorizontalMargin)*2)) * secondaryPercentageVisual).toInt()
+					if (progressPrimaryView?.layoutParams?.width!=newPrimaryWidth) progressPrimaryView?.layoutParams?.width = newPrimaryWidth
+					if (progressSecondaryView?.layoutParams?.width!=newSecondaryWidth) progressSecondaryView?.layoutParams?.width = newSecondaryWidth
+					(newPrimaryWidth).let {
 						//We use the margin to set the marker position.
 						val margin = if(it>0) it else 0
 						if(orientation==LEFT_RIGHT) {
@@ -556,6 +644,10 @@ class InkSeekbar: FrameLayout {
 	 */
 	private fun attemptClaimDrag() {
 		parent?.requestDisallowInterceptTouchEvent(true)
+	}
+	
+	companion object {
+		const val DEFAULT_ANIMATION_DURATION = 2_000L
 	}
 	
 }

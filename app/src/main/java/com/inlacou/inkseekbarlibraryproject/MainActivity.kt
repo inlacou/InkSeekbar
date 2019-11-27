@@ -3,14 +3,11 @@ package com.inlacou.inkseekbarlibraryproject
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
+import androidx.appcompat.app.AppCompatActivity
+import com.inlacou.animations.easetypes.EaseType
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 	
@@ -40,28 +37,14 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_down_top?.maxProgress = maxProgress
 		inkseekbar_left_right?.maxProgress = maxProgress
 		inkseekbar_right_left?.maxProgress = maxProgress
-		Observable.interval(100, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
-			inkseekbar_top_down?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
-			}
-			inkseekbar_down_top?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
-			}
-			inkseekbar_right_left?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, false)
-				it.setSecondaryProgress(it.secondaryProgress+2, false)
-			}
-		},{
-			Log.d("MainActObs", "${it.message}")
-		})
+		inkseekbar_down_top?.generalEaseType = EaseType.EaseOutCubic.newInstance()
+		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
+		inkseekbar_right_left?.setProgress(100, 100, fromUser = false, animate = true, duration = 2000, durationSecondary = 2000)
 		
 		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
 			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
 		}
 	}
-	
 	
 	private fun Resources.getColorCompat(resId: Int): Int {
 		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
