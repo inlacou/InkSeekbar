@@ -3,10 +3,10 @@ package com.inlacou.inkseekbarlibraryproject
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -56,12 +56,10 @@ class MainActivity : AppCompatActivity() {
 		},{
 			Log.d("MainActObs", "${it.message}")
 		})
-		
 		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
 			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
 		}
 	}
-	
 	
 	private fun Resources.getColorCompat(resId: Int): Int {
 		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

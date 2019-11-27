@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.inlacou.animations.easetypes.EaseType
 import com.inlacou.inkseekbar.Orientation.*
 import kotlin.math.roundToInt
 
@@ -41,7 +42,7 @@ class InkSeekbar: FrameLayout {
 			update()
 		}
 	
-	fun setPrimaryProgress(value: Int, fromUser: Boolean) {
+	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false) {
 		if(value>maxProgress)
 			primaryProgress = maxProgress
 		else {
@@ -53,7 +54,7 @@ class InkSeekbar: FrameLayout {
 		update()
 	}
 	
-	fun setSecondaryProgress(value: Int, fromUser: Boolean) {
+	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false) {
 		if(value>maxProgress)
 			secondaryProgress = maxProgress
 		else {
@@ -580,4 +581,19 @@ enum class Orientation {
 	DOWN_TOP,
 	LEFT_RIGHT,
 	RIGHT_LEFT
+}
+
+/**
+ * Visual examples here:
+ * https://easings.net/en
+ */
+enum class Animation {
+	LINEAR,
+	EASE_IN_SINE,
+	EASE_OUT_SINE,
+	EASE_IN_OUT_SINE,
+	EASE_IN_QUAD,
+	EASE_OUT_QUAD,
+	EASE_IN_OUT_QUAD
+	//TODO more here https://easings.net/en
 }
