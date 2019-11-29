@@ -72,9 +72,10 @@
 		app:orientation="RIGHT_LEFT"
 		android:layout_marginTop="10dp"
 		/>
-	<TextView
-		android:id="@+id/tv_animate"
+	<Button
+		android:id="@+id/btn"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:text="I will be animated"/>
+		android:layout_gravity="center"
+		android:text="Restart"/>
 </LinearLayout>

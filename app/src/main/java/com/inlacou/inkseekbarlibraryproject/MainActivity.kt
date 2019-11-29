@@ -4,10 +4,14 @@ import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.inlacou.animations.easetypes.EaseType
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 	
@@ -38,12 +42,35 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_left_right?.maxProgress = maxProgress
 		inkseekbar_right_left?.maxProgress = maxProgress
 		inkseekbar_down_top?.generalEaseType = EaseType.EaseOutCubic.newInstance()
-		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
-		inkseekbar_right_left?.setProgress(100, 100, fromUser = false, animate = true, duration = 2000, durationSecondary = 2000)
 		
 		inkseekbar_left_right?.onValuePrimarySetListener = { primary, fromUser ->
 			if(fromUser) Toast.makeText(this, "primary: $primary", Toast.LENGTH_SHORT).show()
 		}
+		
+		btn?.setOnClickListener {
+			restart()
+		}
+		
+		restart()
+	}
+	
+	fun restart() {
+		inkseekbar_top_down?.setProgress(0, 0, false)
+		inkseekbar_down_top?.setProgress(0, 0, false)
+		inkseekbar_right_left?.setProgress(0, 0, false)
+		
+		//Old (and still valid) method for "animations"
+		Observable.interval(50, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
+			inkseekbar_top_down?.let {
+				it.setPrimaryProgress(it.primaryProgress+1, fromUser = false, animate = false)
+				it.setSecondaryProgress(it.secondaryProgress+2, fromUser = false, animate = false)
+			}
+		},{ Log.e("MainActObs", "${it.message}") })
+		
+		//New method for "animations"
+		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
+		inkseekbar_right_left?.setProgress(100, 100, fromUser = false, animate = true, duration = 2000, durationSecondary = 2000, primaryDelay = 2000)
+		
 	}
 	
 	private fun Resources.getColorCompat(resId: Int): Int {
