@@ -3,14 +3,17 @@ package com.inlacou.inkseekbar
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.text.method.TextKeyListener.clear
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.core.content.res.getDrawableOrThrow
 import com.inlacou.animations.Interpolable
 import com.inlacou.animations.easetypes.EaseType
 import com.inlacou.inkseekbar.Orientation.*
@@ -18,6 +21,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -125,6 +129,7 @@ class InkSeekbar: FrameLayout {
 	var secondaryOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var secondaryCornerRadii: List<Float>? = null
 	var secondaryMargin: Float = 0f
+	var markerIcon: Drawable? = null
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var markerCornerRadii: List<Float>? = null
@@ -239,6 +244,12 @@ class InkSeekbar: FrameLayout {
 				if(aux!=-1) {
 					markerColors.apply { clear(); add(aux) }
 				}
+			}
+			if (ta.hasValue(R.styleable.InkSeekbar_markerIcon)) {
+				try{
+					markerIcon = ta.getDrawableOrThrow(R.styleable.InkSeekbar_markerIcon)
+				}catch (e: Exception){}
+				
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_backgroundColors)) {
 				ta.resources.getIntArray(ta.getResourceId(R.styleable.InkSeekbar_backgroundColors, -1)).toList().let {
@@ -571,11 +582,11 @@ class InkSeekbar: FrameLayout {
 		updateBackground(backgroundView, backgroundOrientation, sanitizeColors(backgroundView, backgroundColors), backgroundCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateBackground(progressPrimaryView, primaryOrientation, sanitizeColors(progressPrimaryView, primaryColors), primaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
 		updateBackground(progressSecondaryView, secondaryOrientation, sanitizeColors(progressSecondaryView, secondaryColors), secondaryCornerRadii ?: generalCornerRadii ?: mutableListOf())
-		updateBackground(markerView, markerOrientation, sanitizeColors(markerView, markerColors), markerCornerRadii ?: generalCornerRadii ?: mutableListOf())
+		updateBackground(markerView, markerOrientation, sanitizeColors(markerView, markerColors), markerCornerRadii ?: generalCornerRadii ?: mutableListOf(), markerIcon)
 	}
 	
 	/**
-	 * Method to sanitize a colors list array.
+	 * Method to sanitize a colors list array to have the correct number of items.
 	 * @param colors Array to sanitize.
 	 * @param view View to get the current color from if possible.
 	 * @return colors list of 2 or more items. Always.
@@ -619,9 +630,9 @@ class InkSeekbar: FrameLayout {
 	 * @param customCornerRadii GradientDrawable corner radii. 1, 4 or 8 items, else ignored.
 	 * @param view View to apply the background to
 	 */
-	private fun updateBackground(view: View?, orientation: GradientDrawable.Orientation, colorList: List<Int>, customCornerRadii: List<Float>) {
+	private fun updateBackground(view: View?, orientation: GradientDrawable.Orientation, colorList: List<Int>, customCornerRadii: List<Float>, drawable: Drawable? = null) {
 		view?.apply {
-			this.setBackgroundCompat(GradientDrawable(orientation, colorList.toIntArray()).apply {
+			this.setBackgroundCompat(drawable ?: GradientDrawable(orientation, colorList.toIntArray()).apply {
 				this.cornerRadii = when {
 					customCornerRadii.size == 1 -> floatArrayOf(
 							customCornerRadii[0], customCornerRadii[0], customCornerRadii[0], customCornerRadii[0],

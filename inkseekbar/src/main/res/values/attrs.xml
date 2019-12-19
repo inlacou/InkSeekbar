@@ -16,6 +16,7 @@
 		<attr name="backgroundColor" format="color|reference"/>
 		<attr name="primaryColor" format="color|reference"/>
 		<attr name="secondaryColor" format="color|reference"/>
+		<attr name="markerIcon" format="reference"/>
 		<attr name="markerColor" format="color|reference"/>
 		<attr name="corners" format="dimension|reference"/>
 		<attr name="backgroundCorners" format="dimension|reference"/>
