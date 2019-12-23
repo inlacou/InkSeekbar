@@ -28,6 +28,13 @@
 		<attr name="secondaryColors" format="reference"/>
 		<attr name="markerColors" format="reference"/>
 
+		<attr name="clickableMode" format="enum">
+			<enum name="LINE" value="0"/>
+			<enum name="MARKER" value="1"/>
+			<enum name="MAX_MARKER_OR_LINE" value="2"/>
+			<enum name="ALL" value="3"/>
+		</attr>
+
 		<attr name="backgroundGradientOrientation" format="enum">
 			<enum name="TOP_BOTTOM" value="0"/>
 			<enum name="TR_BL" value="1"/>

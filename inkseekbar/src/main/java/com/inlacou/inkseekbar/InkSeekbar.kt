@@ -6,12 +6,12 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
-import android.text.method.TextKeyListener.clear
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.core.content.res.getDrawableOrThrow
 import com.inlacou.animations.Interpolable
@@ -31,6 +31,7 @@ class InkSeekbar: FrameLayout {
 	constructor(context: Context, attrSet: AttributeSet) : super(context, attrSet) { readAttrs(attrSet) }
 	constructor(context: Context, attrSet: AttributeSet, arg: Int) : super(context, attrSet, arg) { readAttrs(attrSet) }
 	
+	private lateinit var listener: ViewTreeObserver.OnGlobalLayoutListener
 	private var disposable: Disposable? = null
 	private var clickableView: View? = null
 	private var backgroundView: View? = null
@@ -135,6 +136,8 @@ class InkSeekbar: FrameLayout {
 	var markerOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var markerCornerRadii: List<Float>? = null
 	var mode: Mode = Mode.PROGRESS
+	
+	var clickableMode: ClickableMode = ClickableMode.MAX_MARKER_OR_LINE
 	
 	private val generalHorizontalMargin: Float get() = if(mode==Mode.PROGRESS) 0f else when (orientation) {
 		TOP_DOWN, DOWN_TOP -> {
@@ -308,6 +311,9 @@ class InkSeekbar: FrameLayout {
 					else GradientDrawable.Orientation.values()[it]
 				}
 			}
+			if (ta.hasValue(R.styleable.InkSeekbar_clickableMode)) {
+				clickableMode = ClickableMode.values()[ta.getInt(R.styleable.InkSeekbar_clickableMode, 0)]
+			}
 			if (ta.hasValue(R.styleable.InkSeekbar_mode)) {
 				mode = Mode.values()[ta.getInt(R.styleable.InkSeekbar_mode, 0)]
 			}
@@ -349,11 +355,21 @@ class InkSeekbar: FrameLayout {
 		update()
 	}
 	
+	
+	private fun pipo() {
+	
+	}
+	
 	@SuppressLint("ClickableViewAccessibility")
 	private fun setListeners() {
+		listener = ViewTreeObserver.OnGlobalLayoutListener { update()
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+				viewTreeObserver?.removeOnGlobalLayoutListener(listener)
+			}
+		}
+		viewTreeObserver?.addOnGlobalLayoutListener(listener)
 		clickableView?.setOnTouchListener { _, event ->
 			if(mode==Mode.PROGRESS) return@setOnTouchListener false
-			
 			val relativePosition = when(orientation) {
 				TOP_DOWN, DOWN_TOP -> event.y
 				LEFT_RIGHT, RIGHT_LEFT -> event.x
@@ -484,14 +500,19 @@ class InkSeekbar: FrameLayout {
 				}
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
-				clickableView?.layoutParams?.width  = max(lineWidth.roundToInt(), markerWidth.toInt())
+				clickableView?.layoutParams?.width  = when(clickableMode) {
+					ClickableMode.LINE -> lineWidth.roundToInt()
+					ClickableMode.MARKER -> markerWidth.toInt()
+					ClickableMode.MAX_MARKER_OR_LINE -> max(lineWidth.roundToInt(), markerWidth.toInt())
+					ClickableMode.FULL -> max(max(lineWidth.roundToInt(), markerWidth.toInt()), width)
+				}
 				clickableView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.width  = lineWidth.roundToInt()
 				backgroundView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				progressPrimaryView?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
 				progressSecondaryView?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
 			}
-			LEFT_RIGHT, RIGHT_LEFT -> {
+				Orientation.LEFT_RIGHT, RIGHT_LEFT -> {
 				clickableView?.centerVertical()
 				backgroundView?.centerVertical()
 				progressPrimaryView?.centerVertical()
@@ -509,7 +530,12 @@ class InkSeekbar: FrameLayout {
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				clickableView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
-				clickableView?.layoutParams?.height = max(lineWidth.roundToInt(), markerHeight.toInt())
+				clickableView?.layoutParams?.height = when(clickableMode) {
+					ClickableMode.LINE -> lineWidth.roundToInt()
+					ClickableMode.MARKER -> markerHeight.toInt()
+					ClickableMode.MAX_MARKER_OR_LINE -> max(lineWidth.roundToInt(), markerHeight.toInt())
+					ClickableMode.FULL -> max(max(lineWidth.roundToInt(), markerHeight.toInt()), height)
+				}
 				backgroundView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.height = lineWidth.roundToInt()
 				progressPrimaryView?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
@@ -677,6 +703,13 @@ private fun Orientation.toGradientOrientation(): GradientDrawable.Orientation {
 enum class Mode {
 	PROGRESS,
 	SEEKBAR
+}
+
+enum class ClickableMode {
+	LINE,
+	MARKER,
+	MAX_MARKER_OR_LINE,
+	FULL
 }
 
 enum class Orientation {

@@ -40,7 +40,7 @@
 	<com.inlacou.inkseekbar.InkSeekbar
 		android:id="@+id/inkseekbar_left_right"
 		android:layout_width="300dp"
-		android:layout_height="wrap_content"
+		android:layout_height="200dp"
 		app:lineWidth="10dp"
 		android:layout_marginStart="50dp"
 		android:layout_marginLeft="50dp"
@@ -57,6 +57,7 @@
 		app:mode="SEEKBAR"
 		app:corners="16dp"
 		app:secondaryMargin="1dp"
+		app:clickableMode="ALL"
 		android:layout_marginTop="10dp"
 		app:maxProgress="100"
 		app:secondaryProgress="100"
