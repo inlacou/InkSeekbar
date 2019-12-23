@@ -23,6 +23,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import java.lang.Exception
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 class InkSeekbar: FrameLayout {
@@ -483,7 +484,7 @@ class InkSeekbar: FrameLayout {
 				}
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
-				clickableView?.layoutParams?.width  = lineWidth.roundToInt()
+				clickableView?.layoutParams?.width  = max(lineWidth.roundToInt(), markerWidth.toInt())
 				clickableView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.width  = lineWidth.roundToInt()
 				backgroundView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
@@ -508,7 +509,7 @@ class InkSeekbar: FrameLayout {
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				clickableView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
-				clickableView?.layoutParams?.height = lineWidth.roundToInt()
+				clickableView?.layoutParams?.height = max(lineWidth.roundToInt(), markerHeight.toInt())
 				backgroundView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.height = lineWidth.roundToInt()
 				progressPrimaryView?.layoutParams?.height   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
