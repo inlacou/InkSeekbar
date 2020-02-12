@@ -512,7 +512,7 @@ class InkSeekbar: FrameLayout {
 				progressPrimaryView?.layoutParams?.width   = (lineWidth-((primaryMargin+secondaryMargin)*2)).toInt()
 				progressSecondaryView?.layoutParams?.width = (lineWidth-(secondaryMargin*2)).toInt()
 			}
-				Orientation.LEFT_RIGHT, RIGHT_LEFT -> {
+				LEFT_RIGHT, RIGHT_LEFT -> {
 				clickableView?.centerVertical()
 				backgroundView?.centerVertical()
 				progressPrimaryView?.centerVertical()

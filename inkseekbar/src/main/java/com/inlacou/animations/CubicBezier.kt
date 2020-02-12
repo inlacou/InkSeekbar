@@ -1,14 +1,15 @@
 package com.inlacou.animations
 
 import android.graphics.PointF
+import kotlin.math.abs
 
 /**
  * Created by Weiping on 2016/3/3.
  */
 abstract class CubicBezier: Interpolable {
 
-	var start: PointF? = null
-	var end: PointF? = null
+	private lateinit var start: PointF
+	private lateinit var end: PointF
 	private val a = PointF()
 	private val b = PointF()
 	private val c = PointF()
@@ -34,8 +35,8 @@ abstract class CubicBezier: Interpolable {
 	}
 
 	private fun getBezierCoordinateY(time: Float): Float {
-		c.y = 3 * start!!.y
-		b.y = 3 * (end!!.y - start!!.y) - c.y
+		c.y = 3 * start.y
+		b.y = 3 * (end.y - start.y) - c.y
 		a.y = 1f - c.y - b.y
 		return time * (c.y + time * (b.y + time * a.y))
 	}
@@ -45,7 +46,7 @@ abstract class CubicBezier: Interpolable {
 		var z: Float
 		for (i in 1..13) {
 			z = getBezierCoordinateX(x) - time
-			if (Math.abs(z) < 1e-3) {
+			if (abs(z) < 1e-3) {
 				break
 			}
 			x -= z / getXDerivate(x)
@@ -58,8 +59,8 @@ abstract class CubicBezier: Interpolable {
 	}
 
 	private fun getBezierCoordinateX(time: Float): Float {
-		c.x = 3 * start!!.x
-		b.x = 3 * (end!!.x - start!!.x) - c.x
+		c.x = 3 * start.x
+		b.x = 3 * (end.x - start.x) - c.x
 		a.x = 1f - c.x - b.x
 		return time * (c.x + time * (b.x + time * a.x))
 	}
