@@ -39,6 +39,8 @@ class InkSeekbar: FrameLayout {
 	private var progressSecondaryView: View? = null
 	private var markerView: View? = null
 	
+	private var fingerDown = false
+	
 	/**
 	 * You can create your own Interpolable or use one of my own.
 	 * My own:
@@ -137,7 +139,8 @@ class InkSeekbar: FrameLayout {
 	var markerCornerRadii: List<Float>? = null
 	var mode: Mode = Mode.PROGRESS
 	
-	var clickableMode: ClickableMode = ClickableMode.MAX_MARKER_OR_LINE
+	var clickableZoneMode: ClickableZoneMode = ClickableZoneMode.MAX_MARKER_OR_LINE
+	var whileClickBehaviourMode: WhileClickBehaviourMode = WhileClickBehaviourMode.UPDATE_SECONDARY
 	
 	private val generalHorizontalMargin: Float get() = if(mode==Mode.PROGRESS) 0f else when (orientation) {
 		TOP_DOWN, DOWN_TOP -> {
@@ -312,7 +315,7 @@ class InkSeekbar: FrameLayout {
 				}
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_clickableMode)) {
-				clickableMode = ClickableMode.values()[ta.getInt(R.styleable.InkSeekbar_clickableMode, 0)]
+				clickableZoneMode = ClickableZoneMode.values()[ta.getInt(R.styleable.InkSeekbar_clickableMode, 0)]
 			}
 			if (ta.hasValue(R.styleable.InkSeekbar_mode)) {
 				mode = Mode.values()[ta.getInt(R.styleable.InkSeekbar_mode, 0)]
@@ -355,11 +358,6 @@ class InkSeekbar: FrameLayout {
 		update()
 	}
 	
-	
-	private fun pipo() {
-	
-	}
-	
 	@SuppressLint("ClickableViewAccessibility")
 	private fun setListeners() {
 		listener = ViewTreeObserver.OnGlobalLayoutListener { update()
@@ -392,11 +390,13 @@ class InkSeekbar: FrameLayout {
 			when(event.action){
 				MotionEvent.ACTION_DOWN -> {
 					attemptClaimDrag()
+					fingerDown = true
 					true
 				}
 				MotionEvent.ACTION_CANCEL -> false
 				MotionEvent.ACTION_UP -> {
 					onValuePrimarySetListener?.invoke(primaryProgress, true)
+					fingerDown = false
 					//TODO fire listener release (user interaction true)
 					false
 				}
@@ -408,6 +408,7 @@ class InkSeekbar: FrameLayout {
 	
 	//TODO durations here are a bit odd
 	fun setPrimaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, delay: Long = 0) {
+		if(fingerDown && (whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_NONE || whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_SECONDARY)) return
 		if(value>maxProgress)
 			primaryProgress = maxProgress
 		else {
@@ -421,6 +422,7 @@ class InkSeekbar: FrameLayout {
 	
 	//TODO durations here are a bit odd
 	fun setSecondaryProgress(value: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, delay: Long = 0) {
+		if(fingerDown && (whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_NONE || whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_PRIMARY)) return
 		if(value>maxProgress)
 			secondaryProgress = maxProgress
 		else {
@@ -433,18 +435,31 @@ class InkSeekbar: FrameLayout {
 	}
 	
 	fun setProgress(primary: Int, secondary: Int, fromUser: Boolean, animate: Boolean = false, duration: Long = DEFAULT_ANIMATION_DURATION, durationSecondary: Long = duration, primaryDelay: Long = 0, secondaryDelay: Long = 0) {
-		if(primary>maxProgress) primaryProgress = maxProgress
-		if(secondary>maxProgress) secondaryProgress = maxProgress
-		if(primary<=maxProgress && secondary<=maxProgress) {
-			primaryProgress = primary
-			secondaryProgress = secondary
-			if(fromUser) {
-				onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
+		if(fingerDown && whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_NONE) return
+		val oldPrimary = primaryProgress
+		val oldSecondary = secondaryProgress
+		if(fingerDown && (whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_SECONDARY)) {
+			//Ignore
+		}else{
+			if (primary > maxProgress) primaryProgress = maxProgress
+			else {
+				primaryProgress = primary
+				onValuePrimaryChangeListener?.invoke(primary, fromUser)
+				onValuePrimarySetListener?.invoke(primary, fromUser)
 			}
-			onValuePrimaryChangeListener?.invoke(primary, fromUser)
-			onValuePrimarySetListener?.invoke(primary, fromUser)
-			onValueSecondaryChangeListener?.invoke(secondary, fromUser)
-			onValueSecondarySetListener?.invoke(secondary, fromUser)
+		}
+		if(fingerDown && (whileClickBehaviourMode==WhileClickBehaviourMode.UPDATE_PRIMARY)) {
+			//Ignore
+		}else{
+			if (secondary > maxProgress) secondaryProgress = maxProgress
+			else {
+				secondaryProgress = secondary
+				onValueSecondaryChangeListener?.invoke(secondary, fromUser)
+				onValueSecondarySetListener?.invoke(secondary, fromUser)
+			}
+		}
+		if(fromUser && (oldPrimary!=primaryProgress || oldSecondary!=secondaryProgress)) {
+			onValueChangeListener?.invoke(primaryProgress, secondaryProgress)
 		}
 		startUpdate(animate, durationPrimary = duration, durationSecondary = durationSecondary, primaryDelay = primaryDelay, secondaryDelay = secondaryDelay)
 	}
@@ -500,11 +515,11 @@ class InkSeekbar: FrameLayout {
 				}
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
-				clickableView?.layoutParams?.width  = when(clickableMode) {
-					ClickableMode.LINE -> lineWidth.roundToInt()
-					ClickableMode.MARKER -> markerWidth.toInt()
-					ClickableMode.MAX_MARKER_OR_LINE -> max(lineWidth.roundToInt(), markerWidth.toInt())
-					ClickableMode.FULL -> max(max(lineWidth.roundToInt(), markerWidth.toInt()), width)
+				clickableView?.layoutParams?.width  = when(clickableZoneMode) {
+					ClickableZoneMode.LINE -> lineWidth.roundToInt()
+					ClickableZoneMode.MARKER -> markerWidth.toInt()
+					ClickableZoneMode.MAX_MARKER_OR_LINE -> max(lineWidth.roundToInt(), markerWidth.toInt())
+					ClickableZoneMode.FULL -> max(max(lineWidth.roundToInt(), markerWidth.toInt()), width)
 				}
 				clickableView?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.width  = lineWidth.roundToInt()
@@ -530,11 +545,11 @@ class InkSeekbar: FrameLayout {
 				markerView?.layoutParams?.width = if(mode==Mode.SEEKBAR) markerHeight.roundToInt() else 0
 				markerView?.layoutParams?.height = if(mode==Mode.SEEKBAR) markerWidth.roundToInt() else 0
 				clickableView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
-				clickableView?.layoutParams?.height = when(clickableMode) {
-					ClickableMode.LINE -> lineWidth.roundToInt()
-					ClickableMode.MARKER -> markerHeight.toInt()
-					ClickableMode.MAX_MARKER_OR_LINE -> max(lineWidth.roundToInt(), markerHeight.toInt())
-					ClickableMode.FULL -> max(max(lineWidth.roundToInt(), markerHeight.toInt()), height)
+				clickableView?.layoutParams?.height = when(clickableZoneMode) {
+					ClickableZoneMode.LINE -> lineWidth.roundToInt()
+					ClickableZoneMode.MARKER -> markerHeight.toInt()
+					ClickableZoneMode.MAX_MARKER_OR_LINE -> max(lineWidth.roundToInt(), markerHeight.toInt())
+					ClickableZoneMode.FULL -> max(max(lineWidth.roundToInt(), markerHeight.toInt()), height)
 				}
 				backgroundView?.layoutParams?.width  = ViewGroup.LayoutParams.MATCH_PARENT
 				backgroundView?.layoutParams?.height = lineWidth.roundToInt()
@@ -705,11 +720,18 @@ enum class Mode {
 	SEEKBAR
 }
 
-enum class ClickableMode {
+enum class ClickableZoneMode {
 	LINE,
 	MARKER,
 	MAX_MARKER_OR_LINE,
 	FULL
+}
+
+enum class WhileClickBehaviourMode {
+	UPDATE_PRIMARY,
+	UPDATE_SECONDARY,
+	UPDATE_BOTH,
+	UPDATE_NONE
 }
 
 enum class Orientation {

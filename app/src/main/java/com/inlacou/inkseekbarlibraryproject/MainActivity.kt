@@ -51,6 +51,18 @@ class MainActivity : AppCompatActivity() {
 			restart()
 		}
 		
+		//Old (and still valid) method for "animations"
+		Observable.interval(50, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
+			inkseekbar_top_down?.let {
+				it.setPrimaryProgress(it.primaryProgress+1, fromUser = false, animate = false)
+				it.setSecondaryProgress(it.secondaryProgress+2, fromUser = false, animate = false)
+			}
+			inkseekbar_left_right?.let {
+				it.setPrimaryProgress(it.primaryProgress+1, fromUser = false, animate = false)
+				it.setSecondaryProgress(it.secondaryProgress+2, fromUser = false, animate = false)
+			}
+		},{ Log.e("MainActObs", "${it.message}") })
+		
 		restart()
 	}
 	
@@ -58,14 +70,7 @@ class MainActivity : AppCompatActivity() {
 		inkseekbar_top_down?.setProgress(0, 0, false)
 		inkseekbar_down_top?.setProgress(0, 0, false)
 		inkseekbar_right_left?.setProgress(0, 0, false)
-		
-		//Old (and still valid) method for "animations"
-		Observable.interval(50, TimeUnit.MILLISECONDS).observeOn(AndroidSchedulers.mainThread()).subscribe({
-			inkseekbar_top_down?.let {
-				it.setPrimaryProgress(it.primaryProgress+1, fromUser = false, animate = false)
-				it.setSecondaryProgress(it.secondaryProgress+2, fromUser = false, animate = false)
-			}
-		},{ Log.e("MainActObs", "${it.message}") })
+		inkseekbar_left_right?.setProgress(0, 0, false)
 		
 		//New method for "animations"
 		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
