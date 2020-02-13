@@ -1,5 +1,6 @@
 package com.inlacou.inkseekbar
 
+import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
@@ -41,6 +42,14 @@ internal fun View.centerHorizontal() {
 			layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL)
 			layoutParams.addRule(RelativeLayout.CENTER_VERTICAL, 0)
 		}
+	}
+}
+
+internal fun Resources.getColorCompat(resId: Int): Int {
+	return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+		getColor(resId, null)
+	}else{
+		getColor(resId)
 	}
 }
 

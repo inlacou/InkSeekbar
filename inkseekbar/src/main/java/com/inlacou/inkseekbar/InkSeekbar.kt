@@ -43,7 +43,7 @@ class InkSeekbar: FrameLayout {
 	
 	/**
 	 * You can create your own Interpolable or use one of my own.
-	 * My own:
+	 * My own (for example, there is more):
 	 * EaseType.EaseOutBounce.newInstance()
 	 * or
 	 * EaseType.EaseOutCubic.newInstance()
@@ -51,7 +51,7 @@ class InkSeekbar: FrameLayout {
 	var generalEaseType: Interpolable = EaseType.EaseOutBounce.newInstance()
 	/**
 	 * You can create your own Interpolable or use one of my own.
-	 * My own:
+	 * My own (for example, there is more):
 	 * EaseType.EaseOutBounce.newInstance()
 	 * or
 	 * EaseType.EaseOutCubic.newInstance()
@@ -59,7 +59,7 @@ class InkSeekbar: FrameLayout {
 	var primaryEaseType: Interpolable? = null
 	/**
 	 * You can create your own Interpolable or use one of my own.
-	 * My own:
+	 * My own (for example, there is more):
 	 * EaseType.EaseOutBounce.newInstance()
 	 * or
 	 * EaseType.EaseOutCubic.newInstance()
@@ -121,19 +121,30 @@ class InkSeekbar: FrameLayout {
 	val secondaryPercentage get() = secondaryProgress.toDouble()/maxProgress
 	
 	var generalCornerRadii: List<Float>? = null
+	/**
+	 * Color array, not color resource array
+	 */
 	val backgroundColors: MutableList<Int> = mutableListOf()
 	var backgroundOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var backgroundCornerRadii: List<Float>? = null
-	
+	/**
+	 * Color array, not color resource array
+	 */
 	val primaryColors: MutableList<Int> = mutableListOf()
 	var primaryOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var primaryCornerRadii: List<Float>? = null
 	var primaryMargin: Float = 0f
+	/**
+	 * Color array, not color resource array
+	 */
 	val secondaryColors: MutableList<Int> = mutableListOf()
 	var secondaryOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var secondaryCornerRadii: List<Float>? = null
 	var secondaryMargin: Float = 0f
 	var markerIcon: Drawable? = null
+	/**
+	 * Color array, not color resource array
+	 */
 	val markerColors: MutableList<Int> = mutableListOf()
 	var markerOrientation: GradientDrawable.Orientation = orientation.toGradientOrientation()
 	var markerCornerRadii: List<Float>? = null
@@ -360,7 +371,8 @@ class InkSeekbar: FrameLayout {
 	
 	@SuppressLint("ClickableViewAccessibility")
 	private fun setListeners() {
-		listener = ViewTreeObserver.OnGlobalLayoutListener { update()
+		listener = ViewTreeObserver.OnGlobalLayoutListener {
+			update()
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
 				viewTreeObserver?.removeOnGlobalLayoutListener(listener)
 			}
@@ -561,7 +573,7 @@ class InkSeekbar: FrameLayout {
 		updateSpecific()
 	}
 	
-	private fun updateSpecific(){
+	private fun updateSpecific() {
 		clickableView?.let {
 			when (orientation) {
 				TOP_DOWN, DOWN_TOP -> {
@@ -613,7 +625,6 @@ class InkSeekbar: FrameLayout {
 					progressSecondaryView?.setMargins(right = (secondaryMargin+generalHorizontalMargin).toInt())
 				}
 			}
-			clickableView?.requestLayout()
 			backgroundView?.setMargins(top = generalVerticalMargin.toInt(), bottom = generalVerticalMargin.toInt(), left = generalHorizontalMargin.toInt(), right = generalHorizontalMargin.toInt())
 			backgroundView?.requestLayout()
 			progressPrimaryView?.requestLayout()
@@ -657,8 +668,8 @@ class InkSeekbar: FrameLayout {
 								R.id.inkseekbar_progress_secondary -> R.color.inkseekbar_secondary_default
 								else -> R.color.inkseekbar_default_default
 							}.let {
-								add(it)
-								add(it)
+								add(context.resources.getColorCompat(it))
+								add(context.resources.getColorCompat(it))
 							}
 						}
 					}
