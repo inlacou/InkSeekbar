@@ -75,7 +75,6 @@ class MainActivity : AppCompatActivity() {
 		//New method for "animations"
 		inkseekbar_down_top.setPrimaryProgress(100, fromUser = false, animate = true, duration = 3000L)
 		inkseekbar_right_left?.setProgress(100, 100, fromUser = false, animate = true, duration = 2000, durationSecondary = 2000, primaryDelay = 2000)
-		
 	}
 	
 	private fun Resources.getColorCompat(resId: Int): Int {

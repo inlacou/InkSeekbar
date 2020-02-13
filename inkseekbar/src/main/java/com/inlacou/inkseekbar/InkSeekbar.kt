@@ -468,6 +468,7 @@ class InkSeekbar: FrameLayout {
 		if(animate){
 			tryUpdateAnimated(durationPrimary, durationSecondary, primaryDelay, secondaryDelay)
 		}else{
+			disposable?.dispose() //We stop the animation in progress if a no-animation-update is requested
 			makeUpdate()
 		}
 	}
