@@ -5,7 +5,6 @@ import com.inlacou.animations.CubicBezier;
 /**
  * Created by Weiping on 2016/3/3.
  */
-
 public class EaseInOutElastic extends CubicBezier {
 
     public EaseInOutElastic() {
