@@ -61,3 +61,28 @@ app:mode="SEEKBAR"
 *app:mode* values
   - **SEEKBAR**: allows to se primary progress by hand, and shows the marker
   - **PROGRESS**: can only set values by code, and can't show the marker
+
+# Listeners
+
+```kt
+  /**
+	 * Fired on any value change, primary or secondary. But only if fired by user (or fromUser==true), either for primary or for secondary value change.
+	 */
+	var onValueChangeListener: ((primary: Int, secondary: Int) -> Unit)? = null
+	/**
+	 * Fired on any primary value change.
+	 */
+	var onValuePrimaryChangeListener: ((primary: Int, fromUser: Boolean) -> Unit)? = null
+	/**
+	 * Fired on any primary value change.
+	 */
+	var onValueSecondaryChangeListener: ((secondary: Int, fromUser: Boolean) -> Unit)? = null
+	/**
+	 * Fired when user releases touch or when progress is set programmatically
+	 */
+	var onValuePrimarySetListener: ((primary: Int, fromUser: Boolean) -> Unit)? = null
+	/**
+	 * Fired when progress is set programmatically
+	 */
+	var onValueSecondarySetListener: ((secondary: Int, fromUser: Boolean) -> Unit)? = null
+```
