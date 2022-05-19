@@ -65,7 +65,7 @@ app:mode="SEEKBAR"
 # Listeners
 
 ```kt
-  /**
+         /**
 	 * Fired on any value change, primary or secondary. But only if fired by user (or fromUser==true), either for primary or for secondary value change.
 	 */
 	var onValueChangeListener: ((primary: Int, secondary: Int) -> Unit)? = null
@@ -74,7 +74,7 @@ app:mode="SEEKBAR"
 	 */
 	var onValuePrimaryChangeListener: ((primary: Int, fromUser: Boolean) -> Unit)? = null
 	/**
-	 * Fired on any primary value change.
+	 * Fired on any secondary value change.
 	 */
 	var onValueSecondaryChangeListener: ((secondary: Int, fromUser: Boolean) -> Unit)? = null
 	/**
